@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chọn Phim</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .phim {
+            margin-bottom: 20px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .poster {
+            width: 200px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: transform 0.3s ease;
+        }
+        .poster:hover {
+            transform: scale(1.05);
+        }
+        .showtimes {
+            display: none;
+            margin-top: 15px;
+        }
+        .showtime-times span {
+            display: inline-block;
+            margin: 5px;
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .available-branches {
+            display: none;
+            margin-top: 10px;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .tickets {
+            display: none;
+            margin-top: 10px;
+            background-color: #e0e0e0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .seat {
+            width: 30px;
+            height: 30px;
+            margin: 3px;
+            display: inline-block;
+            border: 1px solid #333;
+            cursor: pointer;
+        }
+        .seat-available {
+            background-color: green;
+        }
+        .seat-sold {
+            background-color: red;
+            cursor: not-allowed;
+        }
+        .seat-selected {
+            background-color: yellow;
+        }
+        .timer {
+            font-size: 18px;
+            color: red;
+        }
+    </style>
+    <script>
+        function toggleShowtimes(maPhim) {
+            const allShowtimes = document.querySelectorAll('.showtimes');
+            allShowtimes.forEach(showtimes => {
+                if (showtimes.id === `showtimes-${maPhim}`) {
+                    showtimes.style.display = showtimes.style.display === 'none' || showtimes.style.display === '' ? 'block' : 'none';
+                } else {
+                    showtimes.style.display = 'none';
+                }
+            });
+        }
+
+        function showBranchesForShowtime(maSuatChieu) {
+            // Hide all branch lists and ticket lists
+            const allBranchLists = document.querySelectorAll('.available-branches');
+            const allTicketLists = document.querySelectorAll('.tickets');
+            
+            allBranchLists.forEach(branchList => {
+                branchList.style.display = 'none';
+            });
+            allTicketLists.forEach(ticketList => {
+                ticketList.style.display = 'none';
+                ticketList.innerHTML = ''; // Clear previous tickets
+            });
+
+            // Show branches for this specific showtime
+            const branchesList = document.getElementById(`branches-${maSuatChieu}`);
+            if (branchesList) {
+                branchesList.style.display = 'block';
+            }
+        }
+
+        function fetchTicketsForRoom(maSuatChieu, maChiNhanh) {
+            fetch(`/tickets/room/${maSuatChieu}/${maChiNhanh}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const ticketsContainer = document.getElementById(`tickets-${maSuatChieu}`);
+                    if (data.phong && data.ve) {
+                        const roomMap = generateRoomMap(data.phong, data.ve);
+                        ticketsContainer.innerHTML = `
+                            <div class="cinema-layout">
+                                <div class="room-info">
+                                    <h4>Room ${data.phong.so_phong} - ${data.phong.loai_phong}</h4>
+                                    <p>Total Seats: ${data.phong.tong_so_ghe}</p>
+                                </div>
+                                <div class="screen">SCREEN</div>
+                                ${roomMap}
+                                <div class="room-coordinates">
+                                    Room Coordinates: X = ${data.phong.toa_do_x}, Y = ${data.phong.toa_do_y}
+                                </div>
+                            </div>
+                        `;
+                        ticketsContainer.style.display = 'block';
+                    } else {
+                        ticketsContainer.innerHTML = '<p>No room or ticket information available.</p>';
+                        ticketsContainer.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching room details:', error);
+                    const ticketsContainer = document.getElementById(`tickets-${maSuatChieu}`);
+                    ticketsContainer.innerHTML = '<p>Error fetching room details. Please try again.</p>';
+                    ticketsContainer.style.display = 'block';
+                });
+        }
+
+        function generateRoomMap(phong, ve) {
+            const totalSeats = phong.tong_so_ghe;
+            const rows = Math.ceil(Math.sqrt(totalSeats));
+            const columns = Math.ceil(totalSeats / rows);
+
+            // Create a set of sold seat numbers for quick lookup
+            const soldSeats = new Set(
+                ve.filter(ticket => ticket.trang_thai === 'mua')
+                  .map(ticket => ticket.so_ghe)
+            );
+
+            let roomMap = `<div class="room-map" style="grid-template-columns: repeat(${columns}, 40px);">`;
+            
+            for (let seatNumber = 1; seatNumber <= totalSeats; seatNumber++) {
+                const seatClass = soldSeats.has(seatNumber) 
+                    ? 'seat seat-sold' 
+                    : 'seat seat-available';
+                
+                roomMap += `<div 
+                    class="${seatClass}" 
+                    title="Seat ${seatNumber}"
+                    data-seat-number="${seatNumber}"
+                    onclick="selectSeat(this, ${seatNumber}, ${phong.so_phong})"
+                >${seatNumber}</div>`;
+            }
+            roomMap += '</div>';
+            return roomMap;
+        }
+
+        function selectSeat(seatElement, seatNumber, roomNumber) {
+            if (seatElement.classList.contains('seat-sold')) {
+                alert('This seat is already sold!');
+                return;
+            }
+
+            // Toggle seat selection
+            seatElement.classList.toggle('seat-selected');
+
+            if (seatElement.classList.contains('seat-selected')) {
+                lockSeat(seatNumber, roomNumber);
+            } else {
+                // Handle seat deselection if needed
+            }
+        }
+
+        function lockSeat(seatNumber, roomNumber) {
+            fetch(`/lock/${seatNumber}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(`Seat ${seatNumber} locked until ${data.locked_until}`);
+                startTimer(seatNumber, data.locked_until);
+            })
+            .catch(error => {
+                console.error('Error locking seat:', error);
+            });
+        }
+
+        function startTimer(seatNumber, lockedUntil) {
+            const timerElement = document.createElement('div');
+            timerElement.classList.add('timer');
+            timerElement.id = `timer-${seatNumber}`;
+            document.body.appendChild(timerElement);
+
+            const endTime = new Date(lockedUntil).getTime();
+
+            const updateTimer = () => {
+                const now = new Date().getTime();
+                const distance = endTime - now;
+
+                if (distance < 0) {
+                    clearInterval(timerInterval);
+                    timerElement.innerHTML = `Seat ${seatNumber} lock expired`;
+                    return;
+                }
+
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                timerElement.innerHTML = `Seat ${seatNumber} lock expires in ${minutes}m ${seconds}s`;
+            };
+
+            updateTimer();
+            const timerInterval = setInterval(updateTimer, 1000);
+        }
+    </script>
+</head>
+<body>
+    <h1>Chọn Phim</h1>
+    <% phim.forEach(phim => { %>
+        <div class="phim">
+            <img src="<%= phim.link_poster %>" alt="<%= phim.ten_phim %>" class="poster" onclick="toggleShowtimes('<%= phim.ma_phim %>')">
+            <div id="showtimes-<%= phim.ma_phim %>" class="showtimes">
+                <h2>Showtimes for <%= phim.ten_phim %></h2>
+                <% 
+                    const groupedShowtimes = suat_chieu
+                        .filter(suat => suat.ma_phim === phim.ma_phim)
+                        .reduce((acc, suat) => {
+                            (acc[suat.ngay_thang] = acc[suat.ngay_thang] || []).push(suat);
+                            return acc;
+                        }, {});
+                %>
+                <% Object.keys(groupedShowtimes).forEach(ngay_thang => { %>
+                    <div class="showtime-date">
+                        <strong><%= ngay_thang %></strong>
+                    </div>
+                    <div class="showtime-times">
+                        <% groupedShowtimes[ngay_thang].forEach(suat => { %>
+                            <span onclick="showBranchesForShowtime('<%= suat.ma_suat_chieu %>')"><%= suat.gio %></span>
+                            <div id="branches-<%= suat.ma_suat_chieu %>" class="available-branches">
+                                <h3>Available Branches</h3>
+                                <% 
+                                    const branches = chi_nhanh.filter(cn => cn.ma_chi_nhanh === suat.ma_chi_nhanh);
+                                    branches.forEach(branch => { 
+                                %>
+                                    <p onclick="fetchTicketsForRoom('<%= suat.ma_suat_chieu %>', '<%= branch.ma_chi_nhanh %>')">
+                                        <%= branch.dia_chi_phu %>
+                                    </p>
+                                <% }) %>
+                            </div>
+                            <div id="tickets-<%= suat.ma_suat_chieu %>" class="tickets"></div>
+                        <% }) %>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+    <% }) %>
+</body>
+</html>
