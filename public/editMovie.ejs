@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sửa Phim</title>
+  <style>
+    /* Cơ bản */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column; /* Điều chỉnh để chứa form và link quay lại */
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .form-container {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .form-container label {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .form-container input, .form-container textarea, .form-container select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    .form-container textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-container input[type="number"], .form-container input[type="text"] {
+      font-size: 14px;
+    }
+
+    .form-container button {
+      padding: 12px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    .form-container button:hover {
+      background-color: #0056b3;
+    }
+
+    .form-container .form-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .form-row .half-width {
+      flex: 1;
+    }
+
+    .form-container input[type="text"]:focus, .form-container input[type="number"]:focus, .form-container textarea:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+
+    .form-container .form-actions {
+      text-align: center;
+    }
+
+    /* Cập nhật cho liên kết "Quay lại danh sách phim" */
+    .back-link {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      text-align: center;
+      border-radius: 5px;
+      margin-top: 20px;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .back-link:hover {
+      background-color: #218838;
+      transform: translateY(-2px); /* Hiệu ứng nâng lên */
+    }
+
+    .back-link:focus {
+      outline: none;
+      box-shadow: 0 0 5px rgba(40, 167, 69, 0.5); /* Hiệu ứng focus */
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h1>Sửa Phim</h1>
+    <form action="/api/phim/edit/<%= movie.Ma_phim %>" method="post">
+      
+      <div class="form-row">
+        <div class="half-width">
+          <label for="title">Tên Phim:</label>
+          <input type="text" name="title" value="<%= movie.Ten_phim %>" required>
+        </div>
+        <div class="half-width">
+          <label for="ageRating">Độ Tuổi:</label>
+          <input type="number" name="ageRating" value="<%= movie.Do_tuoi %>" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="half-width">
+          <label for="releaseYear">Năm Sản Xuất:</label>
+          <input type="number" name="releaseYear" value="<%= movie.Nam_san_xuat %>" required>
+        </div>
+        <div class="half-width">
+          <label for="rating">Rating:</label>
+          <input type="text" name="rating" value="<%= movie.Rating %>" required>
+        </div>
+      </div>
+
+      <label for="duration">Thời Lượng:</label>
+      <input type="text" name="duration" value="<%= movie.Thoi_luong %>" required>
+
+      <label for="posterLink">Link Poster:</label>
+      <input type="text" name="posterLink" value="<%= movie.Link_poster %>">
+
+      <label for="filmLink">Link Phim:</label>
+      <input type="text" name="filmLink" value="<%= movie.Link_phim %>">
+
+      <label for="description">Mô Tả:</label>
+      <textarea name="description"><%= movie.Mo_ta %></textarea>
+
+      <label for="ratingIndex">Xếp Hạng (1-5):</label>
+      <input type="number" name="ratingIndex" value="<%= movie.Nhan_phim %>" min="1" max="5">
+
+      <div class="form-actions">
+        <button type="submit">Cập Nhật Phim</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Quay lại danh sách phim -->
+  <a href="/api/phim" class="back-link">Quay lại danh sách phim</a>
+</body>
+</html>

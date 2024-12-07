@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi Tiết Phim: <%= movie.Ten_phim %></title>
+  <style>
+    /* Cơ bản */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    h1, h2, h3 {
+      color: #333;
+    }
+    .content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      color: #4CAF50;
+    }
+    .section-content {
+      margin-bottom: 20px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .hidden {
+      display: none;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    .hidden {
+  display: none;
+}
+    th, td {
+      padding: 8px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      margin: 5px 0;
+    }
+    .form-container {
+      margin-top: 50px;
+    }
+    .form-container label {
+      display: block;
+      margin: 5px 0;
+    }
+    .form-container input, .form-container select {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    /* Cải tiến giao diện bằng Grid */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .grid-item {
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      height: 100%;
+    }
+    .grid-item h4 {
+      color: #4CAF50;
+    }
+
+    /* Cập nhật phần "Quay lại danh sách phim" */
+    .back-link {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      text-align: center;
+      border-radius: 5px;
+      margin-top: 80px;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .back-link:hover {
+      background-color: #218838;
+      transform: translateY(-2px);
+    }
+
+    .back-link:focus {
+      outline: none;
+      box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+    }
+
+      
+
+  </style>
+</head>
+<body>
+
+  <h1>Chi Tiết Phim: <%= movie.Ten_phim %></h1>
+
+  <!-- Thông tin cơ bản của phim -->
+  <div class="content">
+    <h3 class="section-title">Thông tin Phim</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="flex: 1;">
+        <p><strong>Tên Phim:</strong> <%= movie.Ten_phim %></p>
+        <p><strong>Độ Tuổi:</strong> <%= movie.Do_tuoi %></p>
+        <p><strong>Thời Lượng:</strong> <%= movie.Thoi_luong %> phút</p>
+        <p><strong>Ngày Sản Xuất:</strong> <%= movie.Nam_san_xuat %></p>
+        <p><strong>Rating:</strong> <%= movie.Rating %></p>
+      </div>
+      <div style="flex: 1; text-align: center;">
+        <img src="<%= movie.Link_poster %>" alt="Poster Phim" style="max-width: 200px; border-radius: 8px; box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);">
+      </div>
+    </div>
+    <p><strong>Link Phim:</strong> <a href="<%= movie.Link_phim %>" target="_blank"><%= movie.Link_phim %></a></p>
+  </div>
+
+
+  <!-- Thông tin đạo diễn, diễn viên chính, thể loại, suất chiếu -->
+  <div class="grid-container">
+
+  <!-- Đạo diễn -->
+<div class="grid-item">
+  <h4>Đạo Diễn</h4>
+  <div class="section-content">
+    <% if (directors.length > 0) { %>
+      <ul>
+        <% directors.forEach(function(director) { %>
+          <li><%= director.Dao_dien %></li>
+        <% }) %>
+      </ul>
+    <% } else { %>
+      <p>Không có đạo diễn.</p>
+    <% } %>
+  </div>
+  <button onclick="toggleForm('directorForm')">Thêm/Xóa Đạo Diễn</button>
+</div>
+
+<!-- Diễn viên chính -->
+<div class="grid-item">
+  <h4>Diễn Viên Chính</h4>
+  <div class="section-content">
+    <% if (actors.length > 0) { %>
+      <ul>
+        <% actors.forEach(function(actor) { %>
+          <li><%= actor.Dien_vien_chinh %></li>
+        <% }) %>
+      </ul>
+    <% } else { %>
+      <p>Không có diễn viên chính.</p>
+    <% } %>
+  </div>
+  <button onclick="toggleForm('actorForm')">Thêm/Xóa Diễn Viên Chính</button>
+</div>
+
+<!-- Thể Loại -->
+<div class="grid-item">
+  <h4>Thể Loại</h4>
+  <div class="section-content">
+    <% if (genres.length > 0) { %>
+      <ul>
+        <% genres.forEach(function(genre) { %>
+          <li><%= genre.The_loai %></li>
+        <% }) %>
+      </ul>
+    <% } else { %>
+      <p>Không có thể loại.</p>
+    <% } %>
+  </div>
+  <button onclick="toggleForm('genreForm')">Thêm/Xóa Thể Loại</button>
+</div>
+
+<!-- Suất Chiếu -->
+<div class="grid-item">
+  <h4>Suất Chiếu</h4>
+  <% if (showtimes.length > 0) { %>
+    <table>
+      <thead>
+        <tr>
+          <th>Giờ</th>
+          <th>Ngày</th>
+          <th>Số Phòng</th>
+          <th>Chi Nhánh</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% showtimes.forEach(function(showtime) { %>
+          <tr>
+            <td><%= showtime.Gio %></td>
+            <td><%= showtime.Ngay_thang %></td>
+            <td><%= showtime.So_phong %></td>
+            <td><%= showtime.Ma_chi_nhanh %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <p>Không có suất chiếu.</p>
+  <% } %>
+  <button onclick="toggleForm('showtimeForm')">Thêm/Xóa Suất Chiếu</button>
+</div>
+
+
+  </div>
+
+  <!-- Các form thêm/xóa dữ liệu -->
+  <div id="directorForm" class="form-container hidden">
+    <h4>Thêm Đạo Diễn</h4>
+    <form action="/api/phim/<%= movie.Ma_phim %>/director" method="post">
+      <label for="directorName">Tên Đạo Diễn:</label>
+      <input type="text" name="directorName" id="directorName" required>
+      <button type="submit">Thêm Đạo Diễn</button>
+    </form>
+    <h4>Xóa Đạo Diễn</h4>
+    <form action="/api/phim/<%= movie.Ma_phim %>/delete/director" method="post">
+      <label for="deleteDirector">Chọn Đạo Diễn để Xóa:</label>
+      <select name="directorName" id="deleteDirector" required>
+        <% directors.forEach(function(director) { %>
+          <option value="<%= director.Dao_dien %>"><%= director.Dao_dien %></option>
+        <% }) %>
+      </select>
+      <button type="submit">Xóa Đạo Diễn</button>
+    </form>
+  </div>
+
+  <div id="actorForm" class="form-container hidden">
+    <h4>Thêm Diễn Viên Chính</h4>
+    <form action="/api/phim/<%= movie.Ma_phim %>/actor" method="post">
+      <label for="actorName">Tên Diễn Viên Chính:</label>
+      <input type="text" name="actorName" id="actorName" required>
+      <button type="submit">Thêm Diễn Viên</button>
+    </form>
+    <h4>Xóa Diễn Viên Chính</h4>
+    <form action="/api/phim/<%= movie.Ma_phim %>/delete/actor" method="post">
+      <label for="deleteActor">Chọn Diễn Viên để Xóa:</label>
+      <select name="actorName" id="deleteActor" required>
+        <% actors.forEach(function(actor) { %>
+          <option value="<%= actor.Dien_vien_chinh %>"><%= actor.Dien_vien_chinh %></option>
+        <% }) %>
+      </select>
+      <button type="submit">Xóa Diễn Viên</button>
+    </form>
+  </div>
+
+  <div id="genreForm" class="form-container hidden">
+    <h4>Thêm Thể Loại</h4>
+    <form action="/api/phim/<%= movie.Ma_phim %>/genre" method="post">
+      <label for="genre">Thể Loại:</label>
+      <input type="text" name="genre" id="genre" required>
+      <button type="submit">Thêm Thể Loại</button>
+    </form>
+    <h4>Xóa Thể Loại</h4>
+    <form action="/api/phim/<%= movie.Ma_phim %>/delete/genre" method="post">
+      <label for="deleteGenre">Chọn Thể Loại để Xóa:</label>
+      <select name="genre" id="deleteGenre" required>
+        <% genres.forEach(function(genre) { %>
+          <option value="<%= genre.The_loai %>"><%= genre.The_loai %></option>
+        <% }) %>
+      </select>
+      <button type="submit">Xóa Thể Loại</button>
+    </form>
+  </div>
+
+  <div id="showtimeForm" class="form-container hidden">
+    <h4>Thêm Suất Chiếu</h4>
+    <form action="/api/phim/<%= movie.Ma_phim %>/showtime" method="post">
+
+      <label for="time">Giờ:</label>
+      <input type="time" name="time" id="time" required>
+      
+      <label for="date">Ngày:</label>
+      <input type="date" name="date" id="date" required>
+
+      <label for="roomNumber">Số Phòng:</label>
+      <input type="number" name="roomNumber" id="roomNumber" required>
+
+      <label for="branchId">Mã Chi Nhánh:</label>
+      <input type="number" name="branchId" id="branchId" required>
+
+      <button type="submit">Thêm Suất Chiếu</button>
+    </form>
+
+    <h4>Xóa Suất Chiếu</h4>
+    <form action="/api/phim/<%= movie.Ma_phim %>/delete/showtime" method="post">
+      <label for="deleteShowtime">Chọn Suất Chiếu để Xóa:</label>
+      <select name="showtimeId" id="deleteShowtime" required>
+        <% showtimes.forEach(function(showtime) { %>
+          <option value="<%= showtime.Ma_suat_chieu %>">
+            <%= showtime.Gio %> - <%= showtime.Ngay_thang %> (Phòng: <%= showtime.So_phong %>, Chi Nhánh: <%= showtime.Ma_chi_nhanh %>)
+          </option>
+        <% }) %>
+      </select>
+      <button type="submit">Xóa Suất Chiếu</button>
+    </form>
+  </div>
+
+  <!-- Quay lại danh sách phim -->
+  <a href="/api/phim" class="back-link">Quay lại danh sách phim</a>
+  <script>
+    function toggleForm(formId) {
+      var form = document.getElementById(formId);
+      if (form.classList.contains('hidden')) {
+        form.classList.remove('hidden');
+      } else {
+        form.classList.add('hidden');
+      }
+    }
+  </script>
+</body>
+</html>

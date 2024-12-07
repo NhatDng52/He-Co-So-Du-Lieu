@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Danh sách Phim</title>
+  <style>
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(45deg, #f4f4f9, #e0e0e0);
+  color: #333;
+}
+
+h1 {
+  text-align: center;
+  margin-top: 20px;
+  color: #007bff;
+  font-size: 36px;
+}
+
+form {
+  text-align: center;
+  margin: 20px 0;
+}
+
+input[type="text"], input[type="date"] {
+  padding: 12px;
+  margin: 10px;
+  width: 250px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+input[type="text"]:focus, input[type="date"]:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+button {
+  padding: 12px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.clear-btn, .add-movie-btn {
+  padding: 12px 24px;
+  background-color: #f44336;
+  color: white;
+  border-radius: 50px;
+  font-size: 18px;
+  margin-top: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+  text-align: center;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.clear-btn:hover, .add-movie-btn:hover {
+  background-color: #d32f2f;
+  transform: scale(1.05);
+}
+
+.add-movie-btn {
+  background-color: #28a745;
+}
+
+.add-movie-btn:hover {
+  background-color: #218838;
+}
+
+.movie-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);  /* 4 cột */
+  gap: 20px;  /* Khoảng cách giữa các card */
+  margin: 20px auto;
+  padding: 0 10px;
+}
+
+.movie-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+  text-align: center;
+}
+
+.movie-card:hover {
+  transform: translateY(-10px);
+}
+
+.movie-poster {
+  width: 180px;
+  height: 270px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.movie-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.movie-details {
+  font-size: 14px;
+  color: #666;
+}
+
+.movie-actions {
+  margin-top: 10px;
+}
+
+.movie-actions a {
+  color: #007bff;
+  text-decoration: none;
+  margin: 0 5px;
+}
+
+.movie-actions a:hover {
+  text-decoration: underline;
+}
+
+.popup {
+  display: none;
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #f44336;
+  color: white;
+  padding: 20px;
+  border-radius: 8px;
+  z-index: 1000;
+  font-size: 18px;
+  text-align: center;
+}
+
+.popup.show {
+  display: block;
+}
+
+.popup button {
+  background-color: white;
+  color: #f44336;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  margin-top: 10px;
+  border-radius: 5px;
+}
+
+.button_all{
+  display: flex;
+      justify-content: center; /* Căn giữa theo chiều ngang */
+      /* align-items: center; Căn giữa theo chiều dọc */
+      /* height: 100vh; */
+}
+
+  </style>
+</head>
+<body>
+
+  <% if (messages && messages.error) { %>
+    <div id="errorPopup" class="popup show">
+      <p><%= messages.error %></p>
+      <button onclick="closePopup()">Đóng</button>
+    </div>
+  <% } %>
+
+  <h1>Danh sách Phim</h1>
+
+  <!-- Form tìm kiếm -->
+  <form action="/api/phim/search" method="get">
+    <input type="text" name="searchTerm" placeholder="Tìm phim theo tên" required>
+    <button type="submit">Tìm kiếm</button>
+  </form>
+
+  <form action="/api/phim/date" method="get">
+    <input type="date" name="date" required>
+    <button type="submit">Tìm kiếm theo ngày</button>
+  </form>
+<div class="button_all">
+  <button class="clear-btn" onclick="window.location.href='/api/phim'">Clear All</button>
+  
+  <a href="/api/phim/add" class="add-movie-btn">Thêm Phim</a>
+
+</div>
+ 
+  <div class="movie-list">
+    <% movies.forEach(function(movie) { %>
+      <div class="movie-card">
+        <img src="<%= movie.Link_poster %>" alt="<%= movie.Ten_phim %>" class="movie-poster">
+        <div class="movie-title"><%= movie.Ten_phim %></div>
+        <div class="movie-details">
+          <p><strong>Độ Tuổi:</strong> <%= movie.Do_tuoi %></p>
+          <p><strong>Thời Lượng:</strong> <%= movie.Thoi_luong %> phút</p>
+          <p><strong>Ngày Sản Xuất:</strong> <%= movie.Nam_san_xuat %></p>
+          <p><strong>Rating:</strong> <%= movie.Rating %></p>
+        </div>
+        <div class="movie-actions">
+          <a href="/api/phim/<%= movie.Ma_phim %>">Xem</a>
+          <a href="/api/phim/edit/<%= movie.Ma_phim %>">Sửa</a>
+          <a href="/api/phim/delete/<%= movie.Ma_phim %>">Xóa</a>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+  <script>
+    function closePopup() {
+      document.getElementById('errorPopup').classList.remove('show');
+    }
+  </script>
+</body>
+</html>
