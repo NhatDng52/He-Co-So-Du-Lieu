@@ -2,9 +2,11 @@ const express = require('express');
 const { Sequelize } = require('sequelize');
 const SuatChieu = require('../models/showtime'); // Adjust the path as needed
 const Phim = require('../models/film'); // Adjust the path as needed
-const ChiNhanh = require('../models/branch')
-const Ve = require('../models/ticket')
-const Phong = require('../models/room')
+const ChiNhanh = require('../models/branch');
+const Ve = require('../models/ticket');
+const Phong = require('../models/room');
+const TongVe = require('../models/sumTicket'); // Adjust the path as needed
+
 // GET request handler to get showtimes before now minus x days and render the page
 const getShowtimesBefore = async (req, res) => {
   const days = 7; // Define the number of days here
@@ -40,13 +42,13 @@ const getShowtimesBefore = async (req, res) => {
       }
     });
     // Render the index.ejs template with films and showtimes
-    // res.json({phim, suat_chieu, chi_nhanh })
     res.render('index', { phim, suat_chieu, chi_nhanh });
   } catch (error) {
     console.error('Error fetching showtimes and films:', error);
     res.status(500).send('Internal Server Error');
   }
 };
+
 const getTicketByShowtime = async (req, res) => {
   const { ma_suat_chieu, ma_chi_nhanh } = req.params;
 
@@ -59,7 +61,6 @@ const getTicketByShowtime = async (req, res) => {
         // trang_thai: 'chua_ban' // Assuming there's a status column for tickets
       }
     });
-    console.log("done find ve");
 
     // Fetch the showtime to get the so_phong value
     const suatChieu = await SuatChieu.findOne({
@@ -81,16 +82,46 @@ const getTicketByShowtime = async (req, res) => {
         so_phong: so_phong
       }
     });
-    console.log("done find phong");
 
     // Send the response as JSON
-    res.json({ve, phong});
+    res.json({ ve, phong });
   } catch (error) {
     console.error('Error fetching tickets and room:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
-const lockSeat = async (req, res) => {
+
+const lockTicket = async (req, res) => {
+  const { ma_ve, time } = req.params;
+
+  try {
+    const ve = await Ve.findOne({ where: { ma_ve } });
+
+    if (!ve) {
+      return res.status(404).json({ message: 'Ticket not found' });
+    }
+
+    let lockedUntil;
+    if (time === '-1') {
+      // Lock forever
+      lockedUntil = new Date(9999, 11, 31); // Arbitrary far future date
+    } else {
+      const now = new Date();
+      lockedUntil = new Date(now.getTime() + parseInt(time) * 60000); // Lock for specified minutes
+    }
+
+    ve.locked_until = lockedUntil;
+    ve.trang_thai = 'lock'; // Change status to lock
+    await ve.save();
+
+    res.json({ message: 'Ticket locked', locked_until: lockedUntil });
+  } catch (error) {
+    console.error('Error locking ticket:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+const unlockTicket = async (req, res) => {
   const { ma_ve } = req.params;
 
   try {
@@ -100,32 +131,61 @@ const lockSeat = async (req, res) => {
       return res.status(404).json({ message: 'Ticket not found' });
     }
 
-    const now = new Date();
-    const lockedUntil = new Date(now.getTime() + 5 * 60000); // 5 minutes from now
+    if (ve.trang_thai === 'mua') {
+      return res.status(400).json({ message: 'Cannot unlock a purchased ticket' });
+    }
 
-    ve.locked_until = lockedUntil;
+    ve.locked_until = null;
+    ve.locked_by = null;
+    ve.trang_thai = 'chua_mua'; // Change status back to available
     await ve.save();
 
-    res.json({ message: 'Seat locked', locked_until: lockedUntil });
+    res.json({ message: 'Ticket unlocked' });
   } catch (error) {
-    console.error('Error locking seat:', error);
+    console.error('Error unlocking ticket:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
-// Add a new user
-const createUser = async (req, res) => {
-  const { name, email, age } = req.body;
-  const user = new User({ name, email, age });
+
+const completePayment = async (req, res) => {
+  const { ticketIds } = req.body;
+
+  if (!Array.isArray(ticketIds) || ticketIds.length === 0) {
+    return res.status(400).json({ message: 'Invalid ticket IDs' });
+  }
+
   try {
-    await user.save();
-    res.redirect('/users');
-  } catch (err) {
-    res.status(500).send('Error creating user');
+    // Calculate the total price
+    const totalPrice = ticketIds.length * 100000; // Assuming each ticket costs 100,000 VND
+
+    // Create a new transaction
+    const transaction = await TongVe.create({
+      gia_tong: totalPrice
+    });
+
+    // Update each ticket with the transaction ID and mark as sold
+    await Ve.update(
+      { ma_giao_dich: transaction.ma_giao_dich, trang_thai: 'mua' },
+      {
+        where: {
+          ma_ve: {
+            [Sequelize.Op.in]: ticketIds
+          }
+        }
+      }
+    );
+
+    res.json({ message: 'Payment completed successfully', ma_giao_dich: transaction.ma_giao_dich });
+  } catch (error) {
+    console.error('Error completing payment:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
 module.exports = {
   getTicketByShowtime,
   getShowtimesBefore,
-  createUser
+  lockTicket,
+  unlockTicket,
+  completePayment
 };

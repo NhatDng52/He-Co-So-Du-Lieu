@@ -16,7 +16,7 @@ const TongVe = sequelize.define('TongVe', {
   },
   ma_so_nguoi: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
     field: 'ma_so_nguoi'
   }
 }, {
