@@ -390,6 +390,7 @@
             }
 
             const ticketIds = selectedTickets;
+            console.log(JSON.stringify({ ticketIds }))
             fetch('/tickets/complete-payment', {
                 method: 'POST',
                 headers: {

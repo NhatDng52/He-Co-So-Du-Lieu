@@ -111,7 +111,7 @@ const lockTicket = async (req, res) => {
     }
 
     ve.locked_until = lockedUntil;
-    ve.trang_thai = 'lock'; // Change status to lock
+    ve.trang_thai = 'chua_mua'; // Change status to 'chua_mua'
     await ve.save();
 
     res.json({ message: 'Ticket locked', locked_until: lockedUntil });
@@ -137,7 +137,7 @@ const unlockTicket = async (req, res) => {
 
     ve.locked_until = null;
     ve.locked_by = null;
-    ve.trang_thai = 'chua_mua'; // Change status back to available
+    ve.trang_thai = 'chua_mua'; // Change status back to 'chua_mua'
     await ve.save();
 
     res.json({ message: 'Ticket unlocked' });
@@ -148,8 +148,8 @@ const unlockTicket = async (req, res) => {
 };
 
 const completePayment = async (req, res) => {
-  const { ticketIds } = req.body;
-
+  const  ticketIds  = req.body;
+  console.log(ticketIds)
   if (!Array.isArray(ticketIds) || ticketIds.length === 0) {
     return res.status(400).json({ message: 'Invalid ticket IDs' });
   }
