@@ -383,34 +383,28 @@
             }
         }
 
-        function completePayment() {
+        async function completePayment() {
             if (selectedTickets.length === 0) {
                 alert('Vui lòng chọn ghế trước!');
                 return;
             }
 
-            const ticketIds = selectedTickets;
-            console.log(JSON.stringify({ ticketIds }))
-            fetch('/tickets/complete-payment', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ ticketIds })
-            })
-            .then(response => response.json())
-            .then(data => {
+            const ticketIds = selectedTickets.join(',');
+            try {
+                const response = await fetch(`/tickets/complete-payment/${ticketIds}`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
                 if (data.message === 'Payment completed successfully') {
                     alert(`Thanh toán thành công! Mã giao dịch: ${data.ma_giao_dich}`);
                     location.reload(); // Refresh the page
                 } else {
                     alert('Thanh toán thất bại. Vui lòng thử lại.');
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error completing payment:', error);
                 alert('Thanh toán thất bại. Vui lòng thử lại.');
-            });
+            }
         }
 
         function resetSelection() {

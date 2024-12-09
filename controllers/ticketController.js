@@ -148,15 +148,16 @@ const unlockTicket = async (req, res) => {
 };
 
 const completePayment = async (req, res) => {
-  const  ticketIds  = req.body;
-  console.log(ticketIds)
-  if (!Array.isArray(ticketIds) || ticketIds.length === 0) {
+  const { ticketIds } = req.params;
+  const ticketIdsArray = ticketIds.split(',');
+  console.log(ticketIdsArray)
+  if (!Array.isArray(ticketIdsArray) || ticketIdsArray.length === 0) {
     return res.status(400).json({ message: 'Invalid ticket IDs' });
   }
 
   try {
     // Calculate the total price
-    const totalPrice = ticketIds.length * 100000; // Assuming each ticket costs 100,000 VND
+    const totalPrice = ticketIdsArray.length * 100000; // Assuming each ticket costs 100,000 VND
 
     // Create a new transaction
     const transaction = await TongVe.create({
@@ -169,7 +170,7 @@ const completePayment = async (req, res) => {
       {
         where: {
           ma_ve: {
-            [Sequelize.Op.in]: ticketIds
+            [Sequelize.Op.in]: ticketIdsArray
           }
         }
       }

@@ -17,6 +17,7 @@ const TongVe = sequelize.define('TongVe', {
   ma_so_nguoi: {
     type: DataTypes.INTEGER,
     allowNull: true,
+    defaultValue: () => Math.floor(Math.random() * 1000000),
     field: 'ma_so_nguoi'
   }
 }, {
