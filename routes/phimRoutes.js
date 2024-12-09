@@ -5,6 +5,9 @@ const moment = require('moment');
 
 // Lấy tất cả danh sách phim và render ra trang movie.ejs
 router.get('/phim', async (req, res) => {
+
+  // const {searchTerm,date} = req
+
   try {
     const movies = await phimModel.getAllMovies();
     res.render('movie', { movies });
@@ -16,7 +19,7 @@ router.get('/phim', async (req, res) => {
 // Thêm phim mới
 router.get('/phim/add', (req, res) => {
   res.render('addMovie');  // Render ra form thêm phim
-});
+}); 
 
 router.post('/phim', async (req, res) => {
     const { title, ageRating, releaseYear, rating, duration, posterLink, filmLink, description, ratingIndex } = req.body;
@@ -104,18 +107,66 @@ router.get('/phim/delete/:id', async (req, res) => {
   
 
 // Tìm kiếm phim theo tên
+// router.get('/phim/search', async (req, res) => {
+//   const { searchTerm } = req.query;
+
+//   if (!searchTerm) {
+//     return res.status(400).send('Thiếu từ khóa tìm kiếm');
+//   }
+
+//   try {
+//     const movies = await phimModel.searchMovies(searchTerm);
+//     res.render('movie', { movies });
+//   } catch (error) {
+//     res.status(500).send('Lỗi khi tìm kiếm phim: ' + error.message);
+//   }
+// });
+// Tìm kiếm phim theo tên và ngày (nếu có ngày trong query)
 router.get('/phim/search', async (req, res) => {
-  const { searchTerm } = req.query;
+  const { searchTerm, date } = req.query;
+
+  console.log(searchTerm,date)
 
   if (!searchTerm) {
     return res.status(400).send('Thiếu từ khóa tìm kiếm');
   }
 
+
   try {
-    const movies = await phimModel.searchMovies(searchTerm);
-    res.render('movie', { movies });
+    let movies;
+    if (date) {
+      // Nếu có ngày thì tìm kiếm phim theo tên và ngày
+      movies = await phimModel.searchMoviesByNameAndDate(searchTerm, date);
+    } else {
+      // Nếu không có ngày thì tìm kiếm theo tên phim
+      movies = await phimModel.searchMovies(searchTerm);
+    }
+    
+    res.render('movie', { movies });  // Truyền danh sách phim vào view
   } catch (error) {
     res.status(500).send('Lỗi khi tìm kiếm phim: ' + error.message);
+  }
+});
+
+// Tìm kiếm phim theo tên và ngày
+router.get('/phim/searchByNameAndDate', async (req, res) => {
+
+  // console.log(req.query)
+  let { searchTerm, date } = req.query; // Nhận cả 'searchTerm' và 'date' từ query string
+  console.log("CO du lieu search",searchTerm)
+  console.log("CO  du lieu date",date)
+  
+  // Kiểm tra xem có thiếu tham số không
+  if (!searchTerm && !date) {
+    return res.status(400).send('Thiếu từ khóa tìm kiếm hoặc ngày để truy vấn');
+  }
+
+
+  try {
+    const movies = await phimModel.searchMoviesByNameAndDate(searchTerm, date);  // Gọi hàm model tìm kiếm
+    res.render('movie', { movies });  // Truyền danh sách phim tìm thấy vào view
+  } catch (error) {
+    res.status(500).send('Lỗi khi tìm kiếm phim theo tên và ngày: ' + error.message);
   }
 });
 
@@ -134,6 +185,8 @@ router.get('/phim/date', async (req, res) => {
       res.status(500).send('Lỗi khi lấy danh sách phim theo ngày: ' + error.message);
     }
   });
+
+
 
 
   // Thêm đạo diễn vào phim

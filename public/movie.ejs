@@ -188,17 +188,18 @@ button:hover {
   <h1>Danh sách Phim</h1>
 
   <!-- Form tìm kiếm -->
-  <form action="/api/phim/search" method="get">
-    <input type="text" name="searchTerm" placeholder="Tìm phim theo tên" required>
+  <!-- <form action="/api/phim/search" method="get">
     <button type="submit">Tìm kiếm</button>
+  </form> -->
+
+  <form action="/api/phim/searchByNameAndDate" method="get">
+    <input type="date" name="date">
+    <input type="text" name="searchTerm" placeholder="Tìm phim theo tên" >
+    <button type="submit">Search</button>
   </form>
 
-  <form action="/api/phim/date" method="get">
-    <input type="date" name="date" required>
-    <button type="submit">Tìm kiếm theo ngày</button>
-  </form>
 <div class="button_all">
-  <button class="clear-btn" onclick="window.location.href='/api/phim'">Clear All</button>
+  <button class="clear-btn" onclick="window.location.href='/api/phim'">Dừng Tìm Kiếm</button>
   
   <a href="/api/phim/add" class="add-movie-btn">Thêm Phim</a>
 
@@ -211,8 +212,8 @@ button:hover {
         <div class="movie-title"><%= movie.Ten_phim %></div>
         <div class="movie-details">
           <p><strong>Độ Tuổi:</strong> <%= movie.Do_tuoi %></p>
-          <p><strong>Thời Lượng:</strong> <%= movie.Thoi_luong %> phút</p>
-          <p><strong>Ngày Sản Xuất:</strong> <%= movie.Nam_san_xuat %></p>
+          <p><strong>Thời Lượng:</strong> <%= movie.Thoi_luong %> </p>
+          <p><strong>Năm Sản Xuất:</strong> <%= movie.Nam_san_xuat %></p>
           <p><strong>Rating:</strong> <%= movie.Rating %></p>
         </div>
         <div class="movie-actions">
@@ -231,3 +232,5 @@ button:hover {
   </script>
 </body>
 </html>
+
+

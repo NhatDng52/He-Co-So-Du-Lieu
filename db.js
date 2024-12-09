@@ -1,10 +1,10 @@
 const sql = require('mssql');
 
 const config = {
-  user: 'bb',
+  user: 'bao',
   password: '1234',
   server: 'LAPTOP-4U7G0UT0/SQLEXPRESS',
-  database: 'PHIM_PROJECT',
+  database: 'PHIM_PROJECT_TEST_SCRIPT_1',
   pool: {
     max: 10,
     min: 0,

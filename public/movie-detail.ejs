@@ -140,7 +140,7 @@
       <div style="flex: 1;">
         <p><strong>Tên Phim:</strong> <%= movie.Ten_phim %></p>
         <p><strong>Độ Tuổi:</strong> <%= movie.Do_tuoi %></p>
-        <p><strong>Thời Lượng:</strong> <%= movie.Thoi_luong %> phút</p>
+        <p><strong>Thời Lượng:</strong> <%= movie.Thoi_luong %> </p>
         <p><strong>Ngày Sản Xuất:</strong> <%= movie.Nam_san_xuat %></p>
         <p><strong>Rating:</strong> <%= movie.Rating %></p>
       </div>
@@ -148,7 +148,7 @@
         <img src="<%= movie.Link_poster %>" alt="Poster Phim" style="max-width: 200px; border-radius: 8px; box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);">
       </div>
     </div>
-    <p><strong>Link Phim:</strong> <a href="<%= movie.Link_phim %>" target="_blank"><%= movie.Link_phim %></a></p>
+    <p><strong>Link Trailer Phim:</strong> <a href="<%= movie.Link_phim %>" target="_blank"><%= movie.Link_phim %></a></p>
   </div>
 
 
@@ -341,6 +341,7 @@
         form.classList.add('hidden');
       }
     }
+    
   </script>
 </body>
 </html>
