@@ -1,0 +1,254 @@
+<script>
+    let selectedSeats = [];
+    let selectedTickets = [];
+    let ticketsData = {}; 
+    const maxSeats = 10;
+    let globalTimerInterval;
+    let globalTimerEndTime;
+    function toggleShowtimes(maPhim) {
+        const allShowtimes = document.querySelectorAll('.showtimes');
+        allShowtimes.forEach(showtimes => {
+            if (showtimes.id === `showtimes-${maPhim}`) {
+                showtimes.style.display = showtimes.style.display === 'none' || showtimes.style.display === '' ? 'block' : 'none';
+            } else {
+                showtimes.style.display = 'none';
+            }
+        });
+    }
+
+    function showBranchesForShowtime(maSuatChieu) {
+        // Hide all branch lists and ticket lists
+        const allBranchLists = document.querySelectorAll('.available-branches');
+        const allTicketLists = document.querySelectorAll('.tickets');
+
+        allBranchLists.forEach(branchList => {
+            branchList.style.display = 'none';
+        });
+        allTicketLists.forEach(ticketList => {
+            ticketList.style.display = 'none';
+            ticketList.innerHTML = ''; // Clear previous tickets
+        });
+
+        // Show branches for this specific showtime
+        const branchesList = document.getElementById(`branches-${maSuatChieu}`);
+        if (branchesList) {
+            branchesList.style.display = 'block';
+        }
+    }
+
+    function selectBranch(maSuatChieu, maChiNhanh) {
+        const ticketsDiv = document.getElementById(`tickets-${maSuatChieu}`);
+        fetch(`/tickets/room/${maSuatChieu}/${maChiNhanh}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.phong && data.ve) {
+                    ticketsData = data.ve; // Store tickets data globally
+                    ticketsDiv.innerHTML = renderSeats(data.phong, data.ve);
+                    ticketsDiv.style.display = 'block';
+                } else {
+                    ticketsDiv.innerHTML = '<p>Không có thông tin ghế.</p>';
+                }
+            })
+            .catch(err => {
+                console.error('Lỗi tải ghế:', err);
+                ticketsDiv.innerHTML = '<p>Lỗi khi tải ghế.</p>';
+            });
+    }
+
+    function renderSeats(phong, ve) {
+        const totalSeats = phong.tong_so_ghe;
+        const columns = Math.ceil(Math.sqrt(totalSeats));
+
+        // Create a set of sold seat numbers for quick lookup
+        const soldSeats = new Set(
+            ve.filter(ticket => ticket.trang_thai === 'mua')
+                .map(ticket => ticket.so_ghe)
+        );
+
+        let roomMap = `<div class="room-map" style="grid-template-columns: repeat(${columns}, 40px);">`;
+
+        for (let seatNumber = 1; seatNumber <= totalSeats; seatNumber++) {
+            const seatClass = soldSeats.has(seatNumber)
+                ? 'seat seat-sold'
+                : 'seat seat-available';
+
+            roomMap += `<div 
+                class="${seatClass}" 
+                title="Ticket ${seatNumber}"
+                data-ticket-number="${seatNumber}"
+                onclick="selectTicket(this, ${seatNumber}, ${phong.so_phong})"
+            >
+                ${seatNumber}
+            </div>`;
+        }
+        roomMap += '</div>';
+        return roomMap;
+    }
+
+    function startGlobalTimer() {
+        // Start with 5 minutes
+        const duration = 5 * 60 * 1000; // 5 minutes in milliseconds
+        globalTimerEndTime = new Date().getTime() + duration;
+
+        // Create global timer element
+        const globalTimerEl = document.createElement('div');
+        globalTimerEl.id = 'global-timer';
+        globalTimerEl.classList.add('global-timer');
+        document.body.appendChild(globalTimerEl);
+
+        globalTimerInterval = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = globalTimerEndTime - now;
+
+            if (distance < 0) {
+                clearInterval(globalTimerInterval);
+                globalTimerEl.textContent = 'Time Expired!';
+                // Automatically unlock all selected seats
+                selectedSeats.forEach(ticketNumber => {
+                    unlockTicket(ticketNumber);
+                });
+                selectedSeats = [];
+                selectedTickets = [];
+                return;
+            }
+
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            if (!isNaN(minutes) && !isNaN(seconds)) {
+                globalTimerEl.textContent = `Time Left: ${minutes}m ${seconds}s`;
+            }
+        }, 1000);
+    }
+
+    function selectTicket(ticketElement, seatNumber, roomNumber) {
+        if (ticketElement.classList.contains('seat-sold')) {
+            alert('This ticket is already sold!');
+            return;
+        }
+
+        // Start global timer if not already started
+        if (!globalTimerInterval) {
+            startGlobalTimer();
+        }
+
+        // Toggle ticket selection
+        ticketElement.classList.toggle('seat-selected');
+
+        if (ticketElement.classList.contains('seat-selected')) {
+            if (selectedSeats.length >= maxSeats) {
+                ticketElement.classList.remove('seat-selected');
+                alert(`You can only select up to ${maxSeats} seats.`);
+                return;
+            }
+
+            const ticket = ticketsData.find(ticket => ticket.so_ghe === seatNumber);
+            selectedSeats.push(seatNumber);
+            selectedTickets.push(ticket.ma_ve);
+
+            // Calculate remaining time for locking
+            const now = new Date().getTime();
+            const remainingTime = Math.floor((globalTimerEndTime - now) / 60000);
+
+            lockTicket(ticket.ma_ve, roomNumber, remainingTime);
+        } else {
+            selectedSeats = selectedSeats.filter(id => id !== seatNumber);
+            const ticket = ticketsData.find(ticket => ticket.so_ghe === seatNumber);
+            selectedTickets = selectedTickets.filter(id => id !== ticket.ma_ve);
+            unlockTicket(ticket.ma_ve, roomNumber);
+        }
+
+        updateTotalPrice();
+    }
+
+    function lockTicket(ticketId, roomNumber, lockDuration) {
+        // Ensure lock duration is at least 1 minute
+        lockDuration = Math.max(1, lockDuration);
+
+        fetch(`/tickets/lock/${ticketId}/${lockDuration}`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(`Ticket ${ticketId} locked until ${data.locked_until}`);
+        })
+        .catch(error => {
+            console.error('Error locking ticket:', error);
+        });
+    }
+
+    function unlockTicket(ticketId, roomNumber) {
+        fetch(`/tickets/unlock/${ticketId}`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(`Ticket ${ticketId} unlocked.`);
+        })
+        .catch(error => {
+            console.error('Error unlocking ticket:', error);
+        });
+    }
+
+    function updateTotalPrice() {
+    // Default price per seat (45 VND)
+    const DEFAULT_SEAT_PRICE = 45;
+    let sum = 0;
+
+    selectedTickets.forEach(ticketId => {
+        // If no specific ticket price found, use default price
+        const ticket = ticketsData.find(ticket => ticket.ma_ve === ticketId);
+        const price = (ticket ? (ticket.gia_ghe ? ticket.gia_ghe : DEFAULT_SEAT_PRICE) : 0);
+        console.log(ticket);
+        sum += price;
+    });
+
+    const totalPrice = sum;
+    const paymentSection = document.getElementById('payment-section');
+    const totalPriceElement = document.getElementById('total-price');
+
+    // Always keep the payment section visible
+    paymentSection.style.display = 'block';
+    
+    // Log for debugging
+    console.log('Selected Tickets:', selectedTickets);
+    console.log('Total Price:', sum);
+
+    // Ensure a valid number is displayed
+    if (totalPriceElement) {
+        totalPriceElement.textContent = `${totalPrice.toLocaleString('vi-VN')} VND`;
+    } else {
+        console.error('Total price element not found');
+    }
+}
+
+    async function completePayment() {
+        if (selectedTickets.length === 0) {
+            alert('Vui lòng chọn ghế trước!');
+            return;
+        }
+
+        const ticketIds = selectedTickets.join(',');
+        try {
+            const response = await fetch(`/tickets/complete-payment/${ticketIds}`, {
+                method: 'POST'
+            });
+            const data = await response.json();
+            if (data.message === 'Payment completed successfully') {
+                alert(`Thanh toán thành công! Mã giao dịch: ${data.ma_giao_dich}`);
+                location.reload(); // Refresh the page
+            } else {
+                alert('Thanh toán thất bại. Vui lòng thử lại.');
+            }
+        } catch (error) {
+            console.error('Error completing payment:', error);
+            alert('Thanh toán thất bại. Vui lòng thử lại.');
+        }
+    }
+
+    function resetSelection() {
+        selectedSeats = [];
+        selectedTickets = [];
+        updateTotalPrice();
+    }
+</script>

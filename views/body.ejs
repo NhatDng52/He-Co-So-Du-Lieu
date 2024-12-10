@@ -1,0 +1,44 @@
+<!-- Render dữ liệu từ backend -->
+<% phim.forEach(phim => { %>
+    <div class="phim">
+        <img src="<%= phim.link_poster %>" alt="<%= phim.ten_phim %>" class="poster" onclick="toggleShowtimes('<%= phim.ma_phim %>')">
+        <div class="showtimes" id="showtimes-<%= phim.ma_phim %>">
+            <h2>Showtimes for <%= phim.ten_phim %></h2>
+            <% const groupedShowtimes = suat_chieu.filter(suat => suat.ma_phim === phim.ma_phim)
+                .reduce((acc, suat) => {
+                    (acc[suat.ngay_thang] = acc[suat.ngay_thang] || []).push(suat);
+                    return acc;
+                }, {}); 
+            %>
+            <% Object.keys(groupedShowtimes).forEach(ngay_thang => { %>
+                <div class="showtime-date">
+                    <strong><%= ngay_thang %></strong>
+                </div>
+                <div class="showtime-times">
+                    <% groupedShowtimes[ngay_thang].forEach(suat => { %>
+                        <span onclick="showBranchesForShowtime('<%= suat.ma_suat_chieu %>')">
+                            <%= suat.gio %>
+                        </span>
+                        <div class="available-branches" id="branches-<%= suat.ma_suat_chieu %>">
+                            <h3>Chi Nhánh Có Sẵn</h3>
+                            <% const branches = chi_nhanh.filter(cn => cn.ma_chi_nhanh === suat.ma_chi_nhanh); 
+                                branches.forEach(branch => { 
+                            %>
+                                <p>
+                                    <%= branch.dia_chi_phu %>
+                                    <button onclick="selectBranch('<%= suat.ma_suat_chieu %>', '<%= branch.ma_chi_nhanh %>')">Chọn</button>
+                                </p>
+                            <% }); %>
+                        </div>
+                        <div class="tickets" id="tickets-<%= suat.ma_suat_chieu %>"></div>
+                    <% }); %>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+<% }); %>
+
+<div class="payment-section" id="payment-section">
+    <h4>Tổng tiền: <span id="total-price">0</span> VND</h4>
+    <button onclick="completePayment()">Thanh Toán</button>
+</div>

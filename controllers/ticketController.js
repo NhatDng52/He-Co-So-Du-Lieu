@@ -6,42 +6,23 @@ const ChiNhanh = require('../models/branch');
 const Ve = require('../models/ticket');
 const Phong = require('../models/room');
 const TongVe = require('../models/sumTicket'); // Adjust the path as needed
-
+const TicketProcedure = require('../models/ticketProcedure')
 // GET request handler to get showtimes before now minus x days and render the page
 const getShowtimesBefore = async (req, res) => {
   const days = 7; // Define the number of days here
-  const targetDate = new Date();
-  targetDate.setDate(targetDate.getDate() - days);
 
   try {
-    // Fetch showtimes before the target date
-    const suat_chieu = await SuatChieu.findAll({
-      where: {
-        ngay_thang: {
-          [Sequelize.Op.lt]: targetDate
-        }
-      }
-    });
+    const results = await TicketProcedure.getShowtimesBefore(days);
+    console.log(results);
 
-    // Extract filmIds from the fetched showtimes
-    const ma_phim = suat_chieu.map(suat_chieu => suat_chieu.ma_phim);
-    const ma_chi_nhanh = suat_chieu.map(suat => suat.ma_chi_nhanh);
-    // Fetch films that have filmIds in the extracted list
-    const phim = await Phim.findAll({
-      where: {
-        ma_phim: {
-          [Sequelize.Op.in]: ma_phim
-        }
-      }
-    });
-    const chi_nhanh = await ChiNhanh.findAll({
-      where: {
-        ma_chi_nhanh: {
-          [Sequelize.Op.in]: ma_chi_nhanh
-        }
-      }
-    });
-    // Render the index.ejs template with films and showtimes
+    // The results array will contain multiple result sets
+    const [suat_chieu, phim, chi_nhanh] = results;
+
+    // Handle the case when no showtimes are found
+    if (!suat_chieu || suat_chieu.length === 0) {
+      return res.render('index', { phim: [], suat_chieu: [], chi_nhanh: [] });
+    }
+
     res.render('index', { phim, suat_chieu, chi_nhanh });
   } catch (error) {
     console.error('Error fetching showtimes and films:', error);
