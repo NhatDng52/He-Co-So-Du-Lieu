@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch làm việc</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #333;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #5eb9c7;
+            font-weight: bold;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            padding: 10px;
+            text-align: left;
+            border: 3px solid #ffffff;
+        }
+
+        table th {
+            background-color: #3eb9cc;
+            color: white;
+        }
+
+        .btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .btn-edit {
+            background-color: #3eb9cc;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background-color: #3eb9cc;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+
+        .add-btn {
+            display: inline-block;
+            background-color: #3eb9cc;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .add-btn:hover {
+            background-color: #5eb9c7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header with Navigation Links -->
+        <div class="header">
+            <h1>Lịch làm việc</h1>
+            <div class="nav-links">
+                <a href="/employees">Danh sách nhân viên</a>
+                <a href="/schedule">Lịch làm việc</a>
+            </div>
+        </div>
+
+        <!-- Add Schedule Button -->
+        <a href="/schedule/add" class="add-btn">Thêm lịch</a>
+
+        <h2>Lưu ý: Lịch làm việc chỉ áp dụng cho nhân viên bán thời gian.</h2>
+        <!-- Schedule Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nhân viên</th>
+                    <th>Giờ bắt đầu</th>
+                    <th>Giờ kết thúc</th>
+                    <th>Ngày</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <% schedules.forEach(schedule => { %>
+                    <tr>
+                        <th><%= schedule.sched_id %></th>
+                        <td><%= schedule.fname %></td>
+                        <td><%= schedule.start_hour %></td>
+                        <td><%= schedule.end_hour %></td>
+                        <td><%= schedule.start_date %></td>
+                        <td>
+                            <a href="/schedule/edit/<%= schedule.sched_id %>" class="btn btn-edit">Sửa</a>
+                            <form action="/schedule/delete/<%= schedule.sched_id %>" method="POST" style="display: inline;" class="delete-form">
+                                <button type="submit" class="btn btn-delete">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Event listener for all delete buttons
+        document.querySelectorAll('.delete-form').forEach(form => {
+            form.addEventListener('submit', function(event) {
+                // Show confirmation dialog before submitting the form
+                const confirmed = confirm('Bạn có chắc chắn muốn xóa lịch làm này?');
+                
+                // If user does not confirm, prevent form submission
+                if (!confirmed) {
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

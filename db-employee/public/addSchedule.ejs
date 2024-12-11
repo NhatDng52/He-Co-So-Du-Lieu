@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm lịch làm việc</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        select {
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input, textarea {
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #5eb9c7;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #5eb9c7;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 10px;
+            text-align: center;
+            color: #5eb9c7;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Thêm ca làm</h1>
+        </div>
+
+        <!-- Show the error message if it exists -->
+        <% if (errorMessage) { %>
+            <div style="color: red; margin-bottom: 20px;">
+                <strong><%= errorMessage %></strong>
+            </div>
+        <% } %>
+
+        <!-- Form to Add Schedule -->
+        <form action="/schedule/add" method="POST">
+            <div class="form-group">
+                <label for="employee">Nhân viên</label>
+                <select id="employee" name="employee" required>
+                    <option value="">Chọn nhân viên</option>
+                    <% employees.forEach(employee => { %>
+                        <option value="<%= employee.id %>" >
+                            <%= employee.fname %>
+                        </option>
+                    <% }); %>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="date">Ngày làm</label>
+                <input type="date" id="date" name="date" >
+            </div>
+            
+            <div class="form-group">
+                <label for="start">Giờ bắt đầu</label>
+                <input type="time" id="start" name="start" >
+            </div>
+            
+            <div class="form-group">
+                <label for="end">Giờ kết thúc</label>
+                <input type="time" id="end" name="end" >
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" id="save-button">Lưu thông tin</button>
+            </div>
+            
+            <script>
+                document.getElementById('save-button').addEventListener('click', function(event) {
+                    const startTime = document.getElementById('start').value;
+                    const endTime = document.getElementById('end').value;
+                    console.log(startTime);
+                    console.log(endTime);
+
+                    if (startTime && endTime && endTime <= startTime) {
+                        event.preventDefault();
+                        alert('Giờ kết thúc phải sau giờ bắt đầu!');
+                    }
+
+
+                });
+                
+            </script>
+        </form>
+
+        <!-- Back Button -->
+        <a href="/schedule" class="back-btn">Back to Schedules</a>
+    </div>
+</body>
+</html>

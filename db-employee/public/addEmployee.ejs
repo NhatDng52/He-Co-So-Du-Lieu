@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Employee</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        select {
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input, textarea {
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #5eb9c7;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #5eb9c7;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 10px;
+            text-align: center;
+            color: #5eb9c7;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Thêm nhân viên</h1>
+        <form action="/employees/add" method="POST">
+            <label for="name">Tên</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="sex">Giới tính</label>
+            <select id="sex" name="sex">
+                <option value="M">Nam</option>
+                <option value="F">Nữ</option>
+                <option value="N">Khác</option>
+            </select>
+
+            <label for="age">Tuổi</label>
+            <input type="number" id="age" name="age" min="18" max="120" required>
+
+            <label for="address">Địa chỉ</label>
+            <input id="address" name="address" rows="3" required>
+
+            <label for="supervisor">Người quản lý:</label>
+            <select id="supervisor" name="supervisor">
+                <option value=""></option>
+                <% supervisors.forEach(supervisor => { %>
+                    <option value="<%= supervisor.id %>" >
+                        <%= supervisor.fname %>
+                    </option>
+                <% }) %>
+            </select>
+
+            <label for="CCCD">CCCD</label>
+            <input type="text" id="CCCD" name="CCCD">
+
+            <label for="email">Email</label>
+            <input type="text" id="email" name="email">
+
+            <label for="jobType">Loại hình công việc</label>
+            <select id="jobType" name="jobType">
+                <option value="FULL TIME">Toàn thời gian</option>
+                <option value="PART TIME">Bán thời gian</option>
+            </select>
+
+            <label for="salary">Lương</label>
+            <input type="number" id="salary" name="salary">
+
+            <button type="submit">Thêm</button>
+        </form>
+        <a href="/employees" class="back-btn">Quay lại danh sách</a>
+    </div>
+</body>
+</html>
