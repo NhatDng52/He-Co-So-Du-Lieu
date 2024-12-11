@@ -19,6 +19,7 @@ const getShowtimesBefore = async (req, res) => {
     // Extract the results into phim, suat_chieu, and chi_nhanh
     let [data,buffer] =results;
     const [phim, chi_nhanh, suat_chieu] = data;
+    // res.send({ phim, suat_chieu, chi_nhanh });
     res.render('index', { phim, suat_chieu, chi_nhanh });
   } catch (error) {
     console.error('Error fetching showtimes and films:', error);

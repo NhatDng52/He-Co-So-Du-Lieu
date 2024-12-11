@@ -57,35 +57,41 @@
     }
 
     function renderSeats(phong, ve) {
-        const totalSeats = phong.tong_so_ghe;
-        const columns = Math.ceil(Math.sqrt(totalSeats));
+    const totalSeats = phong.tong_so_ghe;
+    const columns = Math.ceil(Math.sqrt(totalSeats));
 
-        // Create a set of sold seat numbers for quick lookup
-        const soldSeats = new Set(
-            ve.filter(ticket => ticket.trang_thai === 'mua' || ticket.trang_thai === 'lock' )
-                .map(ticket => ticket.so_ghe)
-        );
+    // Create a set of sold seat numbers for quick lookup
+    const soldSeats = new Set(
+        ve.filter(ticket => ticket.trang_thai === 'mua' || ticket.trang_thai === 'lock')
+            .map(ticket => ticket.so_ghe)
+    );
 
-        let roomMap = `<div class="room-map" style="grid-template-columns: repeat(${columns}, 40px);">`;
+    // Render the monitor as a thin black bar with a label below it
+    let roomMap = `
+        <div class="monitor"></div>
+        <div class="monitor-label">Màn Hình</div>
+        <div class="room-map-container">
+            <div class="entrance-label">Lối Vào</div>
+            <div class="room-map" style="grid-template-columns: repeat(${columns}, 40px); margin-top: 80px;">
+    `;
 
-        for (let seatNumber = 1; seatNumber <= totalSeats; seatNumber++) {
-            const seatClass = soldSeats.has(seatNumber)
-                ? 'seat seat-sold'
-                : 'seat seat-available';
+    for (let seatNumber = 1; seatNumber <= totalSeats; seatNumber++) {
+        const seatClass = soldSeats.has(seatNumber)
+            ? 'seat seat-sold'
+            : 'seat seat-available';
 
-            roomMap += `<div 
-                class="${seatClass}" 
-                title="Ticket ${seatNumber}"
-                data-ticket-number="${seatNumber}"
-                onclick="selectTicket(this, ${seatNumber}, ${phong.so_phong})"
-            >
-                ${seatNumber}
-            </div>`;
-        }
-        roomMap += '</div>';
-        return roomMap;
+        roomMap += `<div 
+            class="${seatClass}" 
+            title="Ticket ${seatNumber}"
+            data-ticket-number="${seatNumber}"
+            onclick="selectTicket(this, ${seatNumber}, ${phong.so_phong})"
+        >
+            ${seatNumber}
+        </div>`;
     }
-
+    roomMap += '</div></div>';
+    return roomMap;
+}
     function startGlobalTimer() {
         // Start with 5 minutes
         const duration = 5 * 60 * 1000; // 5 minutes in milliseconds
