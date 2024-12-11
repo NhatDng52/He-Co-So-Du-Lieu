@@ -1,12 +1,12 @@
 const { Sequelize } = require('sequelize');
-const sequelize = require('../config/database');
+const sql = require('../config/db');
 
 const TicketProcedure = {
     getShowtimesBefore: async (days) => {
         const targetDate = new Date();
         targetDate.setDate(targetDate.getDate() + days); // Calculate the target date
         
-        const results = await sequelize.query('CALL GetShowtimesBefore(:targetDate)', {
+        const results = await sql.query('CALL GetShowtimesBefore(:targetDate)', {
           replacements: { targetDate: targetDate.toISOString().split('T')[0] },
           type: Sequelize.QueryTypes.RAW,
           raw: false,  // This might help preserve multiple result sets
