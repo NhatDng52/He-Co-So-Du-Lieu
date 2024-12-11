@@ -25,11 +25,11 @@ const Phong = sequelize.define('phong', {
     field: 'mo_ta'
   },
   toa_do_x: {
-    type: DataTypes.FLOAT,
+    type: DataTypes.INTEGER,
     field: 'toa_do_x'
   },
   toa_do_y: {
-    type: DataTypes.FLOAT,
+    type: DataTypes.INTEGER,
     field: 'toa_do_y'
   },
   kich_thuoc: {

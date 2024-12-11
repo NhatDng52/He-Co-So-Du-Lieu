@@ -13,22 +13,16 @@ const getShowtimesBefore = async (req, res) => {
 
   try {
     const results = await TicketProcedure.getShowtimesBefore(days);
-    console.log(results);
-
-    // The results array will contain multiple result sets
-    const [suat_chieu, phim, chi_nhanh] = results;
-
-    // Handle the case when no showtimes are found
-    if (!suat_chieu || suat_chieu.length === 0) {
-      return res.render('index', { phim: [], suat_chieu: [], chi_nhanh: [] });
-    }
-
+    const [phim, suat_chieu, chi_nhanh] = results;
+    // console.log(results);
+    res.send({ results });
     res.render('index', { phim, suat_chieu, chi_nhanh });
   } catch (error) {
     console.error('Error fetching showtimes and films:', error);
     res.status(500).send('Internal Server Error');
   }
 };
+
 
 const getTicketByShowtime = async (req, res) => {
   const { ma_suat_chieu, ma_chi_nhanh } = req.params;
@@ -92,7 +86,7 @@ const lockTicket = async (req, res) => {
     }
 
     ve.locked_until = lockedUntil;
-    ve.trang_thai = 'chua_mua'; // Change status to 'chua_mua'
+    ve.trang_thai = 'lock';
     await ve.save();
 
     res.json({ message: 'Ticket locked', locked_until: lockedUntil });

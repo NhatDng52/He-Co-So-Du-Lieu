@@ -4,16 +4,15 @@ const sequelize = require('../config/database');
 const TicketProcedure = {
     getShowtimesBefore: async (days) => {
         const targetDate = new Date();
-        targetDate.setDate(targetDate.getDate() + days); // Use +days to get future dates
-    
+        targetDate.setDate(targetDate.getDate() + days); // Calculate the target date
+        
         const results = await sequelize.query('CALL GetShowtimesBefore(:targetDate)', {
           replacements: { targetDate: targetDate.toISOString().split('T')[0] },
-          type: Sequelize.QueryTypes.RAW
+          type: Sequelize.QueryTypes.RAW,
+          raw: false,  // This might help preserve multiple result sets
         });
-    
-
-    return results;
-  },
+        return results; // `results` will now include all result sets
+    },
 
   lockTicket: async (ma_ve, time) => {
     const [results] = await sequelize.query('CALL LockTicket(:ma_ve, :time)', {

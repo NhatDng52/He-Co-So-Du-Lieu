@@ -29,11 +29,11 @@ const Ghe = sequelize.define('ghe', {
     field: 'trang_thai'
   },
   toa_do_x: {
-    type: DataTypes.FLOAT,
+    type: DataTypes.INTEGER,
     field: 'toa_do_x'
   },
   toa_do_y: {
-    type: DataTypes.FLOAT,
+    type: DataTypes.INTEGER,
     field: 'toa_do_y'
   },
   kich_thuoc: {

@@ -61,7 +61,7 @@
 
         // Create a set of sold seat numbers for quick lookup
         const soldSeats = new Set(
-            ve.filter(ticket => ticket.trang_thai === 'mua')
+            ve.filter(ticket => ticket.trang_thai === 'mua' || ticket.trang_thai === 'lock' )
                 .map(ticket => ticket.so_ghe)
         );
 
@@ -191,8 +191,8 @@
     }
 
     function updateTotalPrice() {
-    // Default price per seat (45 VND)
-    const DEFAULT_SEAT_PRICE = 45;
+    // Default price per seat (100 VND)
+    const DEFAULT_SEAT_PRICE = 100;
     let sum = 0;
 
     selectedTickets.forEach(ticketId => {
@@ -216,7 +216,7 @@
 
     // Ensure a valid number is displayed
     if (totalPriceElement) {
-        totalPriceElement.textContent = `${totalPrice.toLocaleString('vi-VN')} VND`;
+        totalPriceElement.textContent = `${totalPrice.toLocaleString('vi-VN')}.000`;
     } else {
         console.error('Total price element not found');
     }
