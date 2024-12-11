@@ -25,12 +25,16 @@ const TicketProcedure = {
           console.log(result);
           return result; // Results will include all result sets
     },
-  unlockTicket: async (ma_ve) => {
-    const [results] = await sequelize.query('CALL UnlockTicket(:ma_ve)', {
-      replacements: { ma_ve }
-    });
+    lockTicket: async (ma_ve, time) => {
+      console.log(`CALL LockTicket(${ma_ve}, ${time})`);
 
-    return results;
+      const result = await sql.execute(`CALL LockTicket(${ma_ve}, ${time})`);
+      console.log(result);
+      return result;
+  },
+  unlockTicket: async (ma_ve) => {
+     await sql.execute(`CALL unLockTicket(${ma_ve})`);
+    return ;
   },
 
   completePayment: async (ticketIds) => {
@@ -39,6 +43,22 @@ const TicketProcedure = {
     });
 
     return results;
+  },
+  createTransaction: async (totalPrice) => {
+    const ma_so_nguoi = Math.floor(Math.random() * 100) + 1; // Generate a random integer between 1 and 100
+    console.log(`CALL CreateTransaction(${totalPrice}, ${ma_so_nguoi})`);
+
+    const result = await sql.execute(`CALL CreateTransaction(${totalPrice}, ${ma_so_nguoi})`);
+    console.log(result);
+    return result; // Return the transaction ID
+  },
+
+  updateTicketsWithTransaction: async (ticketIdsArray, transactionId) => {
+    for (const ticketId of ticketIdsArray) {
+      console.log(`CALL UpdateTicketsWithTransaction(${ticketId}, ${transactionId})`);
+      await sql.execute(`CALL UpdateTicketsWithTransaction(${ticketId}, ${transactionId})`);
+    }
+    console.log('All tickets updated with transaction ID');
   }
 };
 

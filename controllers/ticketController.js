@@ -7,6 +7,7 @@ const Ve = require('../models/ticket');
 const Phong = require('../models/room');
 const TongVe = require('../models/sumTicket'); // Adjust the path as needed
 const TicketProcedure = require('../models/ticketProcedure'); // Adjust the path as needed
+const { json } = require('body-parser');
 
 // GET request handler to get showtimes before now minus x days and render the page
 const getShowtimesBefore = async (req, res) => {
@@ -18,7 +19,6 @@ const getShowtimesBefore = async (req, res) => {
     // Extract the results into phim, suat_chieu, and chi_nhanh
     let [data,buffer] =results;
     const [phim, chi_nhanh, suat_chieu] = data;
-    // res.send( { suat_chieu, chi_nhanh, phim });
     res.render('index', { phim, suat_chieu, chi_nhanh });
   } catch (error) {
     console.error('Error fetching showtimes and films:', error);
@@ -33,12 +33,11 @@ const getTicketByShowtime = async (req, res) => {
   try {
     // Call the stored procedure through the TicketProcedure class
     const results = await TicketProcedure.getTicketsByShowtime(ma_suat_chieu, ma_chi_nhanh);
-
+    let [data,buffer] =results;
     // Destructure the results 
-    // Assuming the procedure returns [tickets, showtime, room]
-    const [ve, phong] = results;
-
-    // Send the response as JSON
+    // Assuming the procedure returns [tickets, showtime, room]z
+    const [ve, data_phong] = data;
+    const phong =data_phong[0]
     res.json({ ve,  phong });
   } catch (error) {
     console.error('Error fetching tickets and room:', error);
@@ -48,28 +47,16 @@ const getTicketByShowtime = async (req, res) => {
 
 const lockTicket = async (req, res) => {
   const { ma_ve, time } = req.params;
-
+  console.log('this is lock',{ ma_ve, time })
   try {
-    const ve = await Ve.findOne({ where: { ma_ve } });
-
-    if (!ve) {
-      return res.status(404).json({ message: 'Ticket not found' });
-    }
-
-    let lockedUntil;
-    if (time === '-1') {
-      // Lock forever
-      lockedUntil = new Date(9999, 11, 31); // Arbitrary far future date
-    } else {
-      const now = new Date();
-      lockedUntil = new Date(now.getTime() + parseInt(time) * 60000); // Lock for specified minutes
-    }
-
-    ve.locked_until = lockedUntil;
-    ve.trang_thai = 'lock';
-    await ve.save();
-
-    res.json({ message: 'Ticket locked', locked_until: lockedUntil });
+    // Call the stored procedure through TicketProcedure
+    let results = await TicketProcedure.lockTicket(ma_ve, time);
+    results =results[0][0][0]
+    // Assuming the procedure returns a result indicating success
+      res.json({ 
+        message: 'Ticket locked', 
+        locked_until: results.locked_until 
+      });
   } catch (error) {
     console.error('Error locking ticket:', error);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -78,23 +65,8 @@ const lockTicket = async (req, res) => {
 
 const unlockTicket = async (req, res) => {
   const { ma_ve } = req.params;
-
-  try {
-    const ve = await Ve.findOne({ where: { ma_ve } });
-
-    if (!ve) {
-      return res.status(404).json({ message: 'Ticket not found' });
-    }
-
-    if (ve.trang_thai === 'mua') {
-      return res.status(400).json({ message: 'Cannot unlock a purchased ticket' });
-    }
-
-    ve.locked_until = null;
-    ve.locked_by = null;
-    ve.trang_thai = 'chua_mua'; // Change status back to 'chua_mua'
-    await ve.save();
-
+  try{
+    await TicketProcedure.unlockTicket(ma_ve);
     res.json({ message: 'Ticket unlocked' });
   } catch (error) {
     console.error('Error unlocking ticket:', error);
@@ -113,25 +85,12 @@ const completePayment = async (req, res) => {
   try {
     // Calculate the total price
     const totalPrice = ticketIdsArray.length * 100000; // Assuming each ticket costs 100,000 VND
-
+    let ma_giao_dich = await TicketProcedure.createTransaction( totalPrice);
+    ma_giao_dich = ma_giao_dich[0][0][0];
+    console.log('ma giao dich la ',ma_giao_dich.ma_giao_dich)
+    await TicketProcedure.updateTicketsWithTransaction(ticketIdsArray,ma_giao_dich.ma_giao_dich);
     // Create a new transaction
-    const transaction = await TongVe.create({
-      gia_tong: totalPrice
-    });
-
-    // Update each ticket with the transaction ID and mark as sold
-    await Ve.update(
-      { ma_giao_dich: transaction.ma_giao_dich, trang_thai: 'mua' },
-      {
-        where: {
-          ma_ve: {
-            [Sequelize.Op.in]: ticketIdsArray
-          }
-        }
-      }
-    );
-
-    res.json({ message: 'Payment completed successfully', ma_giao_dich: transaction.ma_giao_dich });
+    res.json({ message: 'Payment completed successfully', ma_giao_dich: ma_giao_dich.ma_giao_dich });
   } catch (error) {
     console.error('Error completing payment:', error);
     res.status(500).json({ message: 'Internal Server Error' });

@@ -38,6 +38,7 @@
 
     function selectBranch(maSuatChieu, maChiNhanh) {
         const ticketsDiv = document.getElementById(`tickets-${maSuatChieu}`);
+        console.error(`/tickets/room/${maSuatChieu}/${maChiNhanh}`);
         fetch(`/tickets/room/${maSuatChieu}/${maChiNhanh}`)
             .then(res => res.json())
             .then(data => {
