@@ -31,38 +31,15 @@ const getTicketByShowtime = async (req, res) => {
   const { ma_suat_chieu, ma_chi_nhanh } = req.params;
 
   try {
-    // Fetch tickets that have not been bought for the specified showtime
-    const ve = await Ve.findAll({
-      where: {
-        ma_suat_chieu: ma_suat_chieu,
-        // You might want to add a condition to only get unsold tickets
-        // trang_thai: 'chua_ban' // Assuming there's a status column for tickets
-      }
-    });
+    // Call the stored procedure through the TicketProcedure class
+    const results = await TicketProcedure.getTicketsByShowtime(ma_suat_chieu, ma_chi_nhanh);
 
-    // Fetch the showtime to get the so_phong value
-    const suatChieu = await SuatChieu.findOne({
-      where: {
-        ma_suat_chieu: ma_suat_chieu
-      }
-    });
-
-    if (!suatChieu) {
-      return res.status(404).json({ message: 'Showtime not found' });
-    }
-
-    const so_phong = suatChieu.so_phong;
-
-    // Fetch room that belongs to the specified showtime and branch
-    const phong = await Phong.findOne({
-      where: {
-        ma_chi_nhanh: ma_chi_nhanh,
-        so_phong: so_phong
-      }
-    });
+    // Destructure the results 
+    // Assuming the procedure returns [tickets, showtime, room]
+    const [ve, phong] = results;
 
     // Send the response as JSON
-    res.json({ ve, phong });
+    res.json({ ve,  phong });
   } catch (error) {
     console.error('Error fetching tickets and room:', error);
     res.status(500).json({ message: 'Internal Server Error' });

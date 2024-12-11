@@ -17,7 +17,14 @@ const TicketProcedure = {
         return result; // Results will include all result sets
     },
 
-
+  
+    getTicketsByShowtime: async (ma_suat_chieu, ma_chi_nhanh) => {
+          console.log(`CALL GetTicketsByShowtime(${ma_suat_chieu}, ${ma_chi_nhanh})`);
+  
+          const result = await sql.execute(`CALL GetTicketsByShowtime(${ma_suat_chieu}, ${ma_chi_nhanh})`);
+          console.log(result);
+          return result; // Results will include all result sets
+    },
   unlockTicket: async (ma_ve) => {
     const [results] = await sequelize.query('CALL UnlockTicket(:ma_ve)', {
       replacements: { ma_ve }
