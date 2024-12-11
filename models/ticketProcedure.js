@@ -6,11 +6,7 @@ const TicketProcedure = {
         const targetDate = new Date();
         targetDate.setDate(targetDate.getDate() + days); // Calculate the target date
         
-        const results = await sql.query('CALL GetShowtimesBefore(:targetDate)', {
-          replacements: { targetDate: targetDate.toISOString().split('T')[0] },
-          type: Sequelize.QueryTypes.RAW,
-          raw: false,  // This might help preserve multiple result sets
-        });
+        const results = await sql.query('CALL GetShowtimesBefore(:targetDate)');
         return results; // `results` will now include all result sets
     },
 

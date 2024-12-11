@@ -1,4 +1,4 @@
-const sql = require('msql');
+const sql = require('mysql2');
 require('dotenv').config();
 const config = {
   host: process.env.DB_HOST,
@@ -7,6 +7,7 @@ const config = {
     multipleStatements: true // Enable multiple result sets
   }
 };
+
 
 const connectDB = async () => {
   try {
