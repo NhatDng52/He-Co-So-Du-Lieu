@@ -6,16 +6,19 @@ const ChiNhanh = require('../models/branch');
 const Ve = require('../models/ticket');
 const Phong = require('../models/room');
 const TongVe = require('../models/sumTicket'); // Adjust the path as needed
-const TicketProcedure = require('../models/ticketProcedure')
+const TicketProcedure = require('../models/ticketProcedure'); // Adjust the path as needed
+
 // GET request handler to get showtimes before now minus x days and render the page
 const getShowtimesBefore = async (req, res) => {
   const days = 7; // Define the number of days here
 
   try {
     const results = await TicketProcedure.getShowtimesBefore(days);
-    const [phim, suat_chieu, chi_nhanh] = results;
-    // console.log(results);
-    res.send({ results });
+    
+    // Extract the results into phim, suat_chieu, and chi_nhanh
+    let [data,buffer] =results;
+    const [phim, chi_nhanh, suat_chieu] = data;
+    // res.send( { suat_chieu, chi_nhanh, phim });
     res.render('index', { phim, suat_chieu, chi_nhanh });
   } catch (error) {
     console.error('Error fetching showtimes and films:', error);
