@@ -1,5 +1,4 @@
 const express = require('express');
-const { Sequelize } = require('sequelize');
 const SuatChieu = require('../models/showtime'); // Adjust the path as needed
 const Phim = require('../models/film'); // Adjust the path as needed
 const ChiNhanh = require('../models/branch');
@@ -7,7 +6,6 @@ const Ve = require('../models/ticket');
 const Phong = require('../models/room');
 const TongVe = require('../models/sumTicket'); // Adjust the path as needed
 const TicketProcedure = require('../models/ticketProcedure'); // Adjust the path as needed
-const { json } = require('body-parser');
 
 // GET request handler to get showtimes before now minus x days and render the page
 const getShowtimesBefore = async (req, res) => {
