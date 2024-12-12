@@ -1,21 +1,27 @@
-const mysql = require('mysql2');
-require('dotenv').config();
-// Cấu hình kết nối
-const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 3306,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-});
+const sql = require('mssql');
 
+const config = {
+  user: 'sa',
+  password: 'kknhatminh24',
+  server: 'NHAT',
+  database: 'phim_test',
+  pool: {
+    max: 10,
+    min: 0,
+    idleTimeoutMillis: 30000
+  },
+  options: {
+    trustServerCertificate: true
+  }
+};
 
-module.exports = pool.promise();
+const connectDB = async () => {
+  try {
+    await sql.connect(config);
+    console.log('Kết nối cơ sở dữ liệu thành công');
+  } catch (error) {
+    console.error('Lỗi kết nối cơ sở dữ liệu:', error);
+  }
+};
 
-
-
-
-
+module.exports = { sql, connectDB };
