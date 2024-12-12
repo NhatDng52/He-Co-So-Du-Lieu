@@ -1,15 +1,20 @@
 const sql = require('mssql');
 
 const config = {
-  user: 'Khach',
-  password: '1234',
+  user: 'sa',
+  password: 'kknhatminh24',
   server: 'NHAT',
+  port: 1433, // Ensure this is the correct port
   database: 'phim_test',
-  options: {
-    trustServerCertificate: true,
-    trustedConnection:true,
-    enableArithAbort:true,
+  pool: {
+    max: 10,
+    min: 0,
+    idleTimeoutMillis: 30000
   },
+  options: {
+    trustServerCertificate: true, // Change to false if you have a valid certificate
+    enableArithAbort: true
+  }
 };
 
 const connectDB = async () => {
@@ -20,5 +25,10 @@ const connectDB = async () => {
     console.error('Lỗi kết nối cơ sở dữ liệu:', error);
   }
 };
+
+// Enable detailed logging
+sql.on('error', err => {
+  console.error('SQL error', err);
+});
 
 module.exports = { sql, connectDB };
