@@ -1,18 +1,15 @@
 const sql = require('mssql');
 
 const config = {
-  user: 'sa',
-  password: 'kknhatminh24',
+  user: 'Khach',
+  password: '1234',
   server: 'NHAT',
   database: 'phim_test',
-  pool: {
-    max: 10,
-    min: 0,
-    idleTimeoutMillis: 30000
-  },
   options: {
-    trustServerCertificate: true
-  }
+    trustServerCertificate: true,
+    trustedConnection:true,
+    enableArithAbort:true,
+  },
 };
 
 const connectDB = async () => {

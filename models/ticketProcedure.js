@@ -1,4 +1,4 @@
-const sql = require('../config/db');
+const { sql } = require('../config/db');
 
 const TicketProcedure = {
     getShowtimesBefore: async (days) => {
@@ -9,10 +9,11 @@ const TicketProcedure = {
             // Format the date as YYYY-MM-DD
             const formattedDate = targetDate.toISOString().split('T')[0]; // 'YYYY-MM-DD'
 
-            console.log(`CALL GetShowtimesBefore('${formattedDate}')`);
+            console.log(`EXEC GetShowtimesBefore @ngay_ket_thuc = '${formattedDate}'`);
 
             // Use the formatted date in the query
-            const result = await sql.query(`EXEC GetShowtimesBefore @ngay_ket_thuc = '${formattedDate}'`);
+            const pool = await sql.connect();
+            const result = await pool.request().query(`EXEC GetShowtimesBefore @ngay_ket_thuc = '${formattedDate}'`);
             console.log(result);
             return result.recordset;
         } catch (error) {
