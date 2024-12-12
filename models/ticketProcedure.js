@@ -12,9 +12,9 @@ const TicketProcedure = {
             console.log(`CALL GetShowtimesBefore('${formattedDate}')`);
 
             // Use the formatted date in the query
-            const [result] = await sql.query(`EXEC GetShowtimesBefore @ngay_ket_thuc = '${formattedDate}'`);
+            const result = await sql.query(`EXEC GetShowtimesBefore @ngay_ket_thuc = '${formattedDate}'`);
             console.log(result);
-            return result;
+            return result.recordset;
         } catch (error) {
             console.error('Error in getShowtimesBefore:', error);
             throw error;
