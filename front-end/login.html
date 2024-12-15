@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập & Đăng ký</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Form Đăng nhập -->
+        <div id="login-container" class="form-container">
+            <h2>Đăng nhập</h2>
+            <form id="login-form">
+                <label for="login-email">Email:</label>
+                <input type="email" id="login-email" placeholder="Nhập email" required>
+
+                <label for="login-password">Mật khẩu:</label>
+                <div style="position: relative;">
+                    <input type="password" id="login-password" placeholder="Nhập mật khẩu" required>
+                    <span id="toggle-login-password"
+                        style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                        &#128065; <!-- Biểu tượng mắt -->
+                    </span>
+                </div>
+
+                <button class="use-voucher-button" type="submit">Đăng nhập</button>
+            </form>
+            <p id="login-error-message" style="color: red;"></p>
+            <p>
+                Chưa có tài khoản? <a href="#" id="show-register">Đăng ký ngay</a>
+            </p>
+        </div>
+
+        <!-- Form Đăng ký -->
+        <div id="register-container" class="form-container" style="display: none;">
+            <h2>Đăng ký</h2>
+            <form id="register-form">
+                <label for="register-name">Tên của bạn:</label>
+                <input type="text" id="register-name" placeholder="Nhập tên của bạn" required>
+
+                <label for="register-cccd">CCCD/CMND:</label>
+                <input type="text" id="register-cccd" placeholder="Nhập CCCD/CMND" required>
+
+                <label for="register-age">Tuổi:</label>
+                <input type="number" id="register-age" placeholder="Nhập tuổi của bạn" required>
+
+                <label for="register-gender">Giới tính:</label>
+                <select id="register-gender" required style="width: 100%;">
+                    <option value="">Chọn giới tính</option>
+                    <option value="Nam">Nam</option>
+                    <option value="Nữ">Nữ</option>
+                    <option value="Khác">Khác</option>
+                </select>
+
+                <label for="register-address">Địa chỉ:</label>
+                <textarea id="register-address" placeholder="Nhập địa chỉ của bạn" required></textarea>
+
+                <label for="register-email">Email:</label>
+                <input type="email" id="register-email" placeholder="Nhập email của bạn" required>
+
+                <label for="register-password">Mật khẩu:</label>
+                <div style="position: relative;">
+                    <input type="password" id="register-password" placeholder="Nhập mật khẩu" required>
+                    <span id="toggle-password"
+                        style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                        &#128065; <!-- Biểu tượng mắt -->
+                    </span>
+                </div>
+
+                <label for="register-confirm-password">Nhập lại mật khẩu:</label>
+                <div style="position: relative;">
+                    <input type="password" id="register-confirm-password" placeholder="Nhập lại mật khẩu" required>
+                    <span id="toggle-confirm-password"
+                        style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                        &#128065; <!-- Biểu tượng mắt -->
+                    </span>
+                </div>
+
+                <button class="use-voucher-button" type="submit">Đăng ký</button>
+            </form>
+
+            <p id="register-error-message" style="color: red;"></p>
+            <p>
+                Đã có tài khoản? <a href="#" id="show-login">Đăng nhập</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Toggle mật khẩu trong form đăng nhập
+        const toggleLoginPassword = document.getElementById('toggle-login-password');
+        const loginPasswordField = document.getElementById('login-password');
+
+        toggleLoginPassword.addEventListener('click', () => {
+            const type = loginPasswordField.type === 'password' ? 'text' : 'password';
+            loginPasswordField.type = type;
+            toggleLoginPassword.textContent = type === 'password' ? '\uD83D\uDC41' : '\uD83D\uDC40'; // Biểu tượng thay đổi
+        });
+
+        // Toggle mật khẩu hiện tại trong form thay đổi mật khẩu
+        const toggleCurrentPassword = document.getElementById('toggle-current-password');
+        const currentPasswordField = document.getElementById('current-password');
+
+        toggleCurrentPassword.addEventListener('click', () => {
+            const type = currentPasswordField.type === 'password' ? 'text' : 'password';
+            currentPasswordField.type = type;
+            toggleCurrentPassword.textContent = type === 'password' ? '\uD83D\uDC41' : '\uD83D\uDC40';
+        });
+
+        // Toggle mật khẩu mới trong form thay đổi mật khẩu
+        const toggleNewPassword = document.getElementById('toggle-new-password');
+        const newPasswordField = document.getElementById('new-password');
+
+        toggleNewPassword.addEventListener('click', () => {
+            const type = newPasswordField.type === 'password' ? 'text' : 'password';
+            newPasswordField.type = type;
+            toggleNewPassword.textContent = type === 'password' ? '\uD83D\uDC41' : '\uD83D\uDC40';
+        });
+
+        // Toggle mật khẩu hiển thị hoặc ẩn đi
+        const togglePassword = document.getElementById('toggle-password');
+        const passwordField = document.getElementById('register-password');
+
+        togglePassword.addEventListener('click', () => {
+            const type = passwordField.type === 'password' ? 'text' : 'password';
+            passwordField.type = type;
+            togglePassword.textContent = type === 'password' ? '\uD83D\uDC41' : '\uD83D\uDC40'; // Biểu tượng thay đổi
+        });
+
+        const toggleConfirmPassword = document.getElementById('toggle-confirm-password');
+        const confirmPasswordField = document.getElementById('register-confirm-password');
+
+        toggleConfirmPassword.addEventListener('click', () => {
+            const type = confirmPasswordField.type === 'password' ? 'text' : 'password';
+            confirmPasswordField.type = type;
+            toggleConfirmPassword.textContent = type === 'password' ? '\uD83D\uDC41' : '\uD83D\uDC40';
+        });
+    </script>
+
+    <script src="login.js" defer></script>
+</body>
+
+</html>
