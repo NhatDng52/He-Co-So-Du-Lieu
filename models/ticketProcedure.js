@@ -9,13 +9,13 @@ const TicketProcedure = {
             // Format the date as YYYY-MM-DD
             const formattedDate = targetDate.toISOString().split('T')[0]; // 'YYYY-MM-DD'
 
-            console.log(`EXEC GetShowtimesBefore @ngay_ket_thuc = '${formattedDate}'`);
+            console.log(`EXEC GetShowtimesBefore '${formattedDate}'`);
 
             // Use the formatted date in the query
-            const pool = await sql.connect();
-            const result = await pool.request().query(`EXEC GetShowtimesBefore @ngay_ket_thuc = '${formattedDate}'`);
+            // const pool = await sql.connect();
+            const result = await sql.query(`EXEC GetShowtimesBefore '${formattedDate}'`);
             console.log(result);
-            return result.recordset;
+            return result.recordsets;
         } catch (error) {
             console.error('Error in getShowtimesBefore:', error);
             throw error;
@@ -24,11 +24,11 @@ const TicketProcedure = {
 
     getTicketsByShowtime: async (ma_suat_chieu, ma_chi_nhanh) => {
         try {
-            console.log(`CALL GetTicketsByShowtime(${ma_suat_chieu}, ${ma_chi_nhanh})`);
+            console.log(`EXEC GetTicketsByShowtime ${ma_suat_chieu},${ma_chi_nhanh}`);
 
-            const [result] = await sql.query(`EXEC GetTicketsByShowtime @Ma_suat_chieu = ${ma_suat_chieu}, @Ma_chi_nhanh = ${ma_chi_nhanh}`);
-            console.log(result);
-            return result;
+            const result = await sql.query(`EXEC GetTicketsByShowtime ${ma_suat_chieu},${ma_chi_nhanh}`);
+            // console.log(result);
+            return result.recordsets;
         } catch (error) {
             console.error('Error in getTicketsByShowtime:', error);
             throw error;
@@ -37,9 +37,9 @@ const TicketProcedure = {
 
     lockTicket: async (ma_ve, time) => {
         try {
-            console.log(`CALL LockTicket(${ma_ve}, ${time})`);
+            console.log(`EXEC LockTicket ${ma_ve}, ${time}`);
 
-            const [result] = await sql.query(`EXEC LockTicket @Ma_ve = ${ma_ve}, @Time = ${time}`);
+            const result = await sql.query`EXEC LockTicket ${ma_ve},${time}`;
             console.log(result);
             return result;
         } catch (error) {
@@ -59,25 +59,12 @@ const TicketProcedure = {
         }
     },
 
-    completePayment: async (ticketIds) => {
-        try {
-            const ticketIdsParam = ticketIds.join(',');
-            console.log(`CALL CompletePayment(${ticketIdsParam})`);
-
-            const [results] = await sql.query(`EXEC CompletePayment @ticketIds = '${ticketIdsParam}'`);
-            return results;
-        } catch (error) {
-            console.error('Error in completePayment:', error);
-            throw error;
-        }
-    },
-
     createTransaction: async (totalPrice) => {
         try {
             const ma_so_nguoi = Math.floor(Math.random() * 100) + 1; // Generate a random integer between 1 and 100
-            console.log(`CALL CreateTransaction(${totalPrice}, ${ma_so_nguoi})`);
+            console.log(`EXEC CreateTransaction  ${totalPrice},${ma_so_nguoi}`);
 
-            const [result] = await sql.query(`EXEC CreateTransaction @TotalPrice = ${totalPrice}, @Ma_so_nguoi = ${ma_so_nguoi}`);
+            const result = await sql.query(`EXEC CreateTransaction ${totalPrice}, ${ma_so_nguoi}`);
             console.log(result);
             return result; // Return the transaction ID
         } catch (error) {
@@ -89,8 +76,8 @@ const TicketProcedure = {
     updateTicketsWithTransaction: async (ticketIdsArray, transactionId) => {
         try {
             for (const ticketId of ticketIdsArray) {
-                console.log(`CALL UpdateTicketsWithTransaction(${ticketId}, ${transactionId})`);
-                await sql.query(`EXEC UpdateTicketsWithTransaction @TicketId = ${ticketId}, @TransactionId = ${transactionId}`);
+                console.log(`EXEC UpdateTicketsWithTransaction ${ticketId},${transactionId}`);
+                await sql.query(`EXEC UpdateTicketsWithTransaction ${ticketId}, ${transactionId}`);
             }
             console.log('All tickets updated with transaction ID');
         } catch (error) {

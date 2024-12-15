@@ -3,9 +3,9 @@ const sql = require('mssql');
 const config = {
   user: 'Khach',
   password: '1234',
-  server: 'NHAT\\SQLEXPRESS',
+  server: 'NHAT',
   port: 1433, // Ensure this is the correct port
-  database: 'sth',
+  database: 'phim_test_6_13',
   pool: {
     max: 10,
     min: 0,

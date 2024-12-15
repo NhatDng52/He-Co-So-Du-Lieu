@@ -37,12 +37,14 @@
     }
 
     function selectBranch(maSuatChieu, maChiNhanh) {
+        console.error(`ma suat chieu la ${maSuatChieu}, va ${maChiNhanh}`)
         const ticketsDiv = document.getElementById(`tickets-${maSuatChieu}`);
         console.error(`/tickets/room/${maSuatChieu}/${maChiNhanh}`);
         fetch(`/tickets/room/${maSuatChieu}/${maChiNhanh}`)
             .then(res => res.json())
             .then(data => {
                 if (data.phong && data.ve) {
+                    console.error(`phong la ${data.phong.So_phong}`)
                     ticketsData = data.ve; // Store tickets data globally
                     ticketsDiv.innerHTML = renderSeats(data.phong, data.ve);
                     ticketsDiv.style.display = 'block';
@@ -57,13 +59,14 @@
     }
 
     function renderSeats(phong, ve) {
-    const totalSeats = phong.tong_so_ghe;
+    const totalSeats = phong.Tong_so_ghe;
+    console.error(`tong so ghe la${totalSeats} va ve :${ve} `)
     const columns = Math.ceil(Math.sqrt(totalSeats));
 
     // Create a set of sold seat numbers for quick lookup
     const soldSeats = new Set(
-        ve.filter(ticket => ticket.trang_thai === 'mua' || ticket.trang_thai === 'lock')
-            .map(ticket => ticket.so_ghe)
+        ve.filter(ticket => ticket.Trang_thai === 'mua' || ticket.Trang_thai === 'lock')
+            .map(ticket => ticket.So_ghe)
     );
 
     // Render the monitor as a thin black bar with a label below it
@@ -73,7 +76,7 @@
         <div class="room-map-container">
             <div class="room-map" style="grid-template-columns: repeat(${columns}, 40px); margin-top: 80px;">
     `;
-
+    console.error(`this total seat = ${totalSeats}`)
     for (let seatNumber = 1; seatNumber <= totalSeats; seatNumber++) {
         const seatClass = soldSeats.has(seatNumber)
             ? 'seat seat-sold'
@@ -83,7 +86,7 @@
             class="${seatClass}" 
             title="Ticket ${seatNumber}"
             data-ticket-number="${seatNumber}"
-            onclick="selectTicket(this, ${seatNumber}, ${phong.so_phong})"
+            onclick="selectTicket(this, ${seatNumber}, ${phong.So_phong})"
         >
             ${seatNumber}
         </div>`;
@@ -148,20 +151,20 @@
                 return;
             }
 
-            const ticket = ticketsData.find(ticket => ticket.so_ghe === seatNumber);
+            const ticket = ticketsData.find(ticket => ticket.So_ghe === seatNumber);
             selectedSeats.push(seatNumber);
-            selectedTickets.push(ticket.ma_ve);
+            selectedTickets.push(ticket.Ma_ve);
 
             // Calculate remaining time for locking
             const now = new Date().getTime();
             const remainingTime = Math.floor((globalTimerEndTime - now) / 60000);
 
-            lockTicket(ticket.ma_ve, roomNumber, remainingTime);
+            lockTicket(ticket.Ma_ve, roomNumber, remainingTime);
         } else {
             selectedSeats = selectedSeats.filter(id => id !== seatNumber);
-            const ticket = ticketsData.find(ticket => ticket.so_ghe === seatNumber);
-            selectedTickets = selectedTickets.filter(id => id !== ticket.ma_ve);
-            unlockTicket(ticket.ma_ve, roomNumber);
+            const ticket = ticketsData.find(ticket => ticket.So_ghe === seatNumber);
+            selectedTickets = selectedTickets.filter(id => id !== ticket.Ma_ve);
+            unlockTicket(ticket.Ma_ve, roomNumber);
         }
 
         updateTotalPrice();
@@ -203,8 +206,8 @@
 
     selectedTickets.forEach(ticketId => {
         // If no specific ticket price found, use default price
-        const ticket = ticketsData.find(ticket => ticket.ma_ve === ticketId);
-        const price = (ticket ? (ticket.gia_ghe ? ticket.gia_ghe : DEFAULT_SEAT_PRICE) : 0);
+        const ticket = ticketsData.find(ticket => ticket.Ma_ve === ticketId);
+        const price = (ticket ? (ticket.Gia_ghe ? ticket.Gia_ghe : DEFAULT_SEAT_PRICE) : 0);
         console.log(ticket);
         sum += price;
     });

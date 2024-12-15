@@ -13,10 +13,10 @@ const getShowtimesBefore = async (req, res) => {
 
   try {
     const results = await TicketProcedure.getShowtimesBefore(days);
-    
+
     // Extract the results into phim, suat_chieu, and chi_nhanh
-    let [data,buffer] =results;
-    const [phim, chi_nhanh, suat_chieu] = data;
+    // let [data,buffer] =results;
+    const [phim, chi_nhanh, suat_chieu] = results;
     // res.send({ phim, suat_chieu, chi_nhanh });
     res.render('index', { phim, suat_chieu, chi_nhanh });
   } catch (error) {
@@ -32,11 +32,11 @@ const getTicketByShowtime = async (req, res) => {
   try {
     // Call the stored procedure through the TicketProcedure class
     const results = await TicketProcedure.getTicketsByShowtime(ma_suat_chieu, ma_chi_nhanh);
-    let [data,buffer] =results;
+    // let [data,buffer] =results;
     // Destructure the results 
-    // Assuming the procedure returns [tickets, showtime, room]z
-    const [ve, data_phong] = data;
-    const phong =data_phong[0]
+    // Assuming the procedure returns [tickets, showtime, room]
+    let[ve,suat_chieu,phong] = results;
+    phong = phong[0]
     res.json({ ve,  phong });
   } catch (error) {
     console.error('Error fetching tickets and room:', error);
@@ -50,7 +50,7 @@ const lockTicket = async (req, res) => {
   try {
     // Call the stored procedure through TicketProcedure
     let results = await TicketProcedure.lockTicket(ma_ve, time);
-    results =results[0][0][0]
+    results=results.recordset
     // Assuming the procedure returns a result indicating success
       res.json({ 
         message: 'Ticket locked', 
@@ -85,11 +85,12 @@ const completePayment = async (req, res) => {
     // Calculate the total price
     const totalPrice = ticketIdsArray.length * 100000; // Assuming each ticket costs 100,000 VND
     let ma_giao_dich = await TicketProcedure.createTransaction( totalPrice);
-    ma_giao_dich = ma_giao_dich[0][0][0];
-    console.log('ma giao dich la ',ma_giao_dich.ma_giao_dich)
-    await TicketProcedure.updateTicketsWithTransaction(ticketIdsArray,ma_giao_dich.ma_giao_dich);
+ 
+    ma_giao_dich = ma_giao_dich.recordset[0];
+    console.log('ma giao dich la ',ma_giao_dich.Ma_giao_dich)
+    await TicketProcedure.updateTicketsWithTransaction(ticketIdsArray,ma_giao_dich.Ma_giao_dich);
     // Create a new transaction
-    res.json({ message: 'Payment completed successfully', ma_giao_dich: ma_giao_dich.ma_giao_dich });
+    res.json({ message: 'Payment completed successfully', ma_giao_dich: ma_giao_dich.Ma_giao_dich });
   } catch (error) {
     console.error('Error completing payment:', error);
     res.status(500).json({ message: 'Internal Server Error' });

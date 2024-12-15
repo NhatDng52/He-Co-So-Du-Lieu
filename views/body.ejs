@@ -2,22 +2,22 @@
 <% phim.forEach(phim => { %>
     <div class="phim">
         <div class="phim-poster">
-            <img src="<%= phim.link_poster %>" alt="<%= phim.ten_phim %>" class="poster" onclick="toggleShowtimes('<%= phim.ma_phim %>')">
+            <img src="<%= phim.Link_poster %>" alt="<%= phim.Ten_phim %>" class="poster" onclick="toggleShowtimes('<%= phim.Ma_phim %>')">
         </div>
         <div class="phim-details">
-            <h2><%= phim.ten_phim %></h2>
-            <p><strong>Độ tuổi:</strong> <%= phim.do_tuoi %></p>
-            <p><strong>Năm sản xuất:</strong> <%= phim.nam_san_xuat %></p>
-            <p><strong>Rating:</strong> <%= phim.rating %></p>
-            <p><strong>Thời lượng:</strong> <%= phim.thoi_luong %> phút</p>
-            <p><strong>Mô tả:</strong> <%= phim.mo_ta %></p>
-            <p><strong>Nhân phim:</strong> <%= phim.nhan_phim %></p>
+            <h2><%= phim.Ten_phim %></h2>
+            <p><strong>Độ tuổi:</strong> <%= phim.Do_tuoi %></p>
+            <p><strong>Năm sản xuất:</strong> <%= phim.Nam_san_xuat %></p>
+            <p><strong>Rating:</strong> <%= phim.Rating %></p>
+            <p><strong>Thời lượng:</strong> <%= phim.Thoi_luong %> phút</p>
+            <p><strong>Mô tả:</strong> <%= phim.Mo_ta %></p>
+            <p><strong>Nhân phim:</strong> <%= phim.Nhan_phim %></p>
         </div>
-        <div class="showtimes" id="showtimes-<%= phim.ma_phim %>">
-            <h2>Showtimes for <%= phim.ten_phim %></h2>
-            <% const groupedShowtimes = suat_chieu.filter(suat => suat.ma_phim === phim.ma_phim)
+        <div class="showtimes" id="showtimes-<%= phim.Ma_phim %>">
+            <h2>Showtimes for <%= phim.Ten_phim %></h2>
+            <% const groupedShowtimes = suat_chieu.filter(suat => suat.Ma_phim === phim.Ma_phim)
                 .reduce((acc, suat) => {
-                    (acc[suat.ngay_thang] = acc[suat.ngay_thang] || []).push(suat);
+                    (acc[suat.Ngay_thang] = acc[suat.Ngay_thang] || []).push(suat);
                     return acc;
                 }, {}); 
             %>
@@ -27,21 +27,21 @@
                 </div>
                 <div class="showtime-times">
                     <% groupedShowtimes[ngay_thang].forEach(suat => { %>
-                        <span onclick="showBranchesForShowtime('<%= suat.ma_suat_chieu %>')">
-                            <%= suat.gio %>
+                        <span onclick="showBranchesForShowtime('<%= suat.Ma_suat_chieu %>')">
+                            <%= suat.Gio %>
                         </span>
-                        <div class="available-branches" id="branches-<%= suat.ma_suat_chieu %>">
+                        <div class="available-branches" id="branches-<%= suat.Ma_suat_chieu %>">
                             <h3>Chi Nhánh Có Sẵn</h3>
-                            <% const branches = chi_nhanh.filter(cn => cn.ma_chi_nhanh === suat.ma_chi_nhanh); 
+                            <% const branches = chi_nhanh.filter(cn => cn.Ma_chi_nhanh === suat.Ma_chi_nhanh); 
                                 branches.forEach(branch => { 
                             %>
                                 <p>
-                                    <%= branch.dia_chi_phu %>
-                                    <button onclick="selectBranch('<%= suat.ma_suat_chieu %>', '<%= branch.ma_chi_nhanh %>')">Chọn</button>
+                                    <%= branch.Dia_chi_phu %>
+                                    <button onclick="selectBranch('<%= suat.Ma_suat_chieu %>', '<%= branch.Ma_chi_nhanh %>')">Chọn</button>
                                 </p>
                             <% }); %>
                         </div>
-                        <div class="tickets" id="tickets-<%= suat.ma_suat_chieu %>"></div>
+                        <div class="tickets" id="tickets-<%= suat.Ma_suat_chieu %>"></div>
                     <% }); %>
                 </div>
             <% }); %>
