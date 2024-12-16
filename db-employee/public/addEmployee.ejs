@@ -85,6 +85,14 @@
 <body>
     <div class="container">
         <h1>Thêm nhân viên</h1>
+
+        <!-- Show the error message if it exists -->
+        <% if (errorMessage) { %>
+            <div style="color: red; margin-bottom: 20px;">
+                <strong><%= errorMessage %></strong>
+            </div>
+        <% } %>
+
         <form action="/employees/add" method="POST">
             <label for="name">Tên</label>
             <input type="text" id="name" name="name" required>

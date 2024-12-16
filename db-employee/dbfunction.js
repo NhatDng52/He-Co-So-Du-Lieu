@@ -1,21 +1,21 @@
 const connection = require('./db');
 
 async function getInfo() {
-     try {
-        const [employees] = await connection.promise().query('CALL show_info()');
-        employees.sort((a, b) => a.id - b.id);
-        return employees;
+    try {
+        const employees = await connection.query('EXEC show_info');
+        console.log(employees)
+        return employees['recordset'];
     } catch (err) {
         console.error('Error fetching employees:', err);
         throw err; // Rethrow the error if there's a problem
     } 
-
-} 
+}
 
 async function getEmployeeByID(id) {
     try {
-        const [employee] = await connection.promise().query(`Call getEmployeeByID(?)`, id);
-        return employee;
+        const employee = await connection.query`EXEC getEmployeeByID ${id}` ;
+        console.log(employee['recordset']);
+        return employee['recordset'];
     } catch (err) {
         console.error('Error fetching employee by ID:', err);
         throw err; // Rethrow the error if there's a problem
@@ -24,10 +24,10 @@ async function getEmployeeByID(id) {
 
 async function getAllIDName() {
     try {
-        const [employees] = await connection.promise().query(
-            'SELECT people.id, people.fname FROM people, employee WHERE people.id = employee.id'
+        const employees = await connection.query(
+            'SELECT people.id, people.fname FROM people INNER JOIN employee ON people.id = employee.id'
         );
-        return employees;
+        return employees['recordset'];
     } catch (err) {
         console.error('Error fetching employees name:', err);
         throw err; // Rethrow the error if there's a problem
@@ -40,20 +40,20 @@ async function updateEmployee(id, updatedData) {
     const jobType = updatedData.jobType;
     const age = updatedData.age;
     const address = updatedData.address;
-    const supervisor= updatedData.supervisor;
+    const supervisor = updatedData.supervisor;
     const CCCD = updatedData.CCCD;
     const Salary = updatedData.salary;
     const email = updatedData.email;
-    console.log([id, fname, age, sex, email, CCCD, address, supervisor, jobType, Salary])
+    console.log([id, fname, age, sex, email, CCCD, address, supervisor, jobType, Salary]);
 
     try {
         if (supervisor != '') {
-            await connection.promise().query(
-                'CALL alter_employee(?,?,?,?,?,?,?,?,?,?)', [id, fname, age, sex, email, CCCD, address, supervisor, jobType, Salary]
+            await connection.query(
+                `EXEC alter_employee ${id}, '${fname}', ${age}, '${sex}', '${email}', '${CCCD}', '${address}', ${supervisor}, '${jobType}', ${Salary}`
             );
         } else {
-            await connection.promise().query(
-                'CALL alter_employee(?,?,?,?,?,?,?,?,?,?)', [id, fname, age, sex, email, CCCD, address, null, jobType, Salary]
+            await connection.query(
+                `EXEC alter_employee ${id}, '${fname}', ${age}, '${sex}', '${email}', '${CCCD}', '${address}', ${null}, '${jobType}', ${Salary}`
             );
         }
     } catch (err) {
@@ -75,26 +75,27 @@ async function addEmployee(addInfo) {
 
     try {
         if (supervisor != '') {
-            await connection.promise().query(
-                'CALL add_employee(?,?, ?, ?, ?, ?, ?,?,?)', [fname, age, sex, email, CCCD, address, supervisor, jobType, Salary]
+            await connection.query(
+                `EXEC add_employee '${fname}', ${age}, '${sex}', '${email}', '${CCCD}', '${address}', ${supervisor}, '${jobType}', ${Salary}`
             );
         } else {
-            await connection.promise().query(
-                'CALL add_employee(?,?, ?, ?, ?, ?, ?,?,?)', [fname, age, sex, email, CCCD, address, null, jobType, Salary]
+            await connection.query(
+                `EXEC add_employee '${fname}', ${age}, '${sex}', '${email}', '${CCCD}', '${address}', ${null}, '${jobType}', ${Salary}`
             );
         }
     } catch (err) {
-        console.error('Error updating employee:', err);
+        console.error('Error adding employee:', err);
         throw err; // Rethrow the error if there's a problem
     }
 }
 
 async function getSchedule() {
     try {
-        const [Schedule] = await connection.promise().query(
-            'SELECT fname, sched_id, start_hour, end_hour, start_date FROM shift, people WHERE people.id = shift.id'
+        const Schedule = await connection.query(
+            `SELECT fname, sched_id, start_hour, end_hour,start_date FROM shift INNER JOIN people ON people.id = shift.id`
         );
-        return Schedule;
+        console.log(Schedule['recordset']);
+        return Schedule['recordset'];
     } catch (err) {
         console.error('Error fetching schedule:', err);
         throw err; // Rethrow the error if there's a problem
@@ -103,10 +104,10 @@ async function getSchedule() {
 
 async function getPartTime() {
     try {
-        const [employees] = await connection.promise().query(
-            'SELECT people.id, people.fname FROM people, part_time_emp WHERE people.id = part_time_emp.id'
+        const employees = await connection.query(
+            'SELECT people.id, people.fname FROM people INNER JOIN part_time_emp ON people.id = part_time_emp.id'
         );
-        return employees;
+        return employees['recordset'];
     } catch (err) {
         console.error('Error fetching employees name:', err);
         throw err; // Rethrow the error if there's a problem
@@ -114,44 +115,45 @@ async function getPartTime() {
 }
 
 async function getScheduleByID(id) {
-        try {
-            const [schedule] = await connection.promise().query(
-                `SELECT sched_id, id, start_hour, end_hour, start_date FROM shift WHERE sched_id = ?`, [id]
-            );
-            return schedule;
-        } catch (err) {
-            console.error('Error fetching employee by ID:', err);
-            throw err; // Rethrow the error if there's a problem
-        }
-}
-
-async function getScheduleOfEmployee(id) {
     try {
-        const [schedule] = await connection.promise().query(
-            `SELECT sched_id, id, start_hour, end_hour, start_date FROM shift, employee WHERE employee.id = ? AND shift.id = employee.id`, [id]
+        const schedule = await connection.query(
+            `SELECT sched_id, id, start_hour, end_hour, start_date FROM shift WHERE sched_id = ${id}`
         );
-        return schedule;
+        return schedule['recordset'];
     } catch (err) {
         console.error('Error fetching employee by ID:', err);
         throw err; // Rethrow the error if there's a problem
     }
 }
 
+async function getScheduleOfEmployee(id) {
+    try {
+        const schedule = await connection.query(
+            `SELECT sched_id, id, start_hour, end_hour, start_date FROM shift INNER JOIN employee ON employee.id = ${id} AND shift.id = employee.id` 
+        );
+        console.log(schedule['recordset']);
+        return schedule['recordset'];
+    } catch (err) {
+        console.error('Error fetching schedule for employee by ID:', err);
+        throw err; // Rethrow the error if there's a problem
+    }
+}
+
 async function editSchedule(id, employee, date, start, end) {
     try {
-        await connection.promise().query(
-            'UPDATE shift SET id = ?, start_hour = ?, end_hour = ?, start_date = ? WHERE sched_id =?', [employee, start, end, date, id]
+        await connection.query(
+            `UPDATE shift SET id = ${employee}, start_hour = '${start.substring(0,8)}', end_hour = '${end.substring(0,8)}', start_date = '${date}' WHERE sched_id = ${id}`
         );
-    } catch (err) {
-        console.error('Error adding schedules:', err);
+    } catch (err) { 
+        console.error('Error editing schedules:', err);
         throw err; // Rethrow the error if there's a problem
     } 
 }
 
 async function addSchedule(employee, date, start, end) {
     try {
-        await connection.promise().query(
-            'INSERT INTO shift(id, start_hour, end_hour, start_date) VALUES (?,?,?,?)', [employee, start, end, date]
+        await connection.query(
+            `INSERT INTO shift (id, start_hour, end_hour, start_date) VALUES (${employee}, '${start.substring(0,8)}', '${end.substring(0,8)}', '${date}')`
         );
     } catch (err) {
         console.error('Error adding schedules:', err);
@@ -161,8 +163,8 @@ async function addSchedule(employee, date, start, end) {
 
 async function deleteEmployee(id) {
     try {
-        await connection.promise().query(
-            'DELETE FROM employee WHERE employee.id = ?', [id]
+        await connection.query(
+            `DELETE FROM employee WHERE id = ${id}`
         );
     } catch (err) {
         console.error('Error deleting employee:', err);
@@ -172,47 +174,62 @@ async function deleteEmployee(id) {
 
 async function deleteShift(id) {
     try {
-        await connection.promise().query(
-            'DELETE FROM shift WHERE shift.sched_id = ?', [id]
+        await connection.query(
+            `DELETE FROM shift WHERE sched_id = ${id}`
         );
     } catch (err) {
-        console.error('Error deleting schedules:', err);
+        console.error('Error deleting shift:', err);
         throw err; // Rethrow the error if there's a problem
     } 
 }
 
 async function checkSchedule(sched_id, id, start, end, date) {
     try {
-        const [[check]] = await connection.promise().query(
-            'Call checkSchedule(?, ?, ?, ?, ?)',
-            [sched_id, id, start, end, date]
+        const check= await connection.query(
+            `EXEC checkSchedule ${sched_id}, ${id}, '${start.substring(0,8)}', '${end.substring(0,8)}', '${date}'`
         );
-        return check.length == 0;
+        return check['recordset'].length === 0;
     } catch (err) {
-        console.error('Error deleting schedules:', err);
+        console.error('Error checking schedule:', err);
         throw err; // Rethrow the error if there's a problem
     } 
 }
 
 async function checkScheduleAlt(id, start, end, date) {
     try {
-        const [[check]] = await connection.promise().query(
-            'Call checkScheduleAlt(?, ?, ?, ?)',
-            [id, start, end, date]
+        const check = await connection.query(
+            `EXEC checkScheduleAlt  ${id}, '${start.substring(0,8)}', '${end.substring(0,8)}', '${date}'`
         );
-        console.log([id, start, end, date])
-        console.log("check")
-        console.log(check)
-        console.log("[check]")
-        console.log([check])
-        console.log(check.length);
-        return check.length == 0;
+        return check['recordset'].length === 0;
     } catch (err) {
-        console.error('Error deleting schedules:', err);
+        console.error('Error checking schedule:', err);
         throw err; // Rethrow the error if there's a problem
     } 
 }
 
+async function checkCCCD(cccd, id) {
+    try {
+        const CCCD = await connection.query(
+            `SELECT cccd FROM people INNER JOIN employee ON people.id = employee.id WHERE cccd = '${cccd}' AND people.id != ${id}`
+        );
+        return CCCD['recordset'].length === 0;  
+    } catch (err) {
+        console.error('Error checking CCCD:', err);
+        throw err; // Rethrow the error if there's a problem
+    } 
+}
+
+async function checkEmail(email, id) {
+    try {
+        const Emails = await connection.query(
+            `SELECT email FROM people INNER JOIN employee ON people.id = employee.id WHERE email = '${email}' AND people.id != ${id}`
+        );
+        return Emails['recordset'].length === 0;
+    } catch (err) {
+        console.error('Error checking email:', err);
+        throw err; // Rethrow the error if there's a problem
+    } 
+}
 
 module.exports = {
     getInfo,
@@ -229,6 +246,7 @@ module.exports = {
     deleteEmployee,
     deleteShift,
     checkSchedule,
-    checkScheduleAlt
+    checkScheduleAlt,
+    checkCCCD,
+    checkEmail
 };
-

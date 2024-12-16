@@ -1,39 +1,39 @@
-const mysql = require('mysql2');
+const sql = require('mssql');
 
-// Create a connection to the database
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
+// Create a connection configuration for the MS SQL database
+const config = {       
+    server: 'DESKTOP-0HD1B0H', // SQL Server host
+    user: 'tam',
     password: '123',
-    database: 'employee'
-});
+    database: 'Employee',
+    options: {
+        trustServerCertificate: true, // Change to false if you have a valid certificate
+        enableArithAbort: true
+    }
+};
 
 // Connect to the database
-connection.connect(err => {
-    if (err) {
+async function connectToDatabase() {
+    try {
+        await sql.connect(config);
+        console.log('Connected to the MS SQL database!');
+    } catch (err) {
         console.error('Error connecting to the database:', err);
-        return;
     }
-    console.log('Connected to the MySQL database!');
-});
+}
 
-// Connect and fetch data
-connection.connect(err => {
-    if (err) {
-        console.error('Error connecting to database:', err);
-        return;
+// Fetch data from the 'people' table
+async function fetchData() {
+    try {
+        const result = await sql.query('SELECT * FROM people');
+    } catch (err) {
+        console.error('Error fetching data:', err);
     }
-    console.log('Connected to the database!');
+}
 
-/*     connection.query('SELECT * FROM people', (err, results) => {
-        if (err) {
-            console.error('Error fetching data:', err);
-            return;
-        }
-        console.log('People:', results);
+// Example usage
+connectToDatabase()
+    .then(() => fetchData())
+    .catch((err) => console.error('Error:', err));
 
-        // Close the connection
-    }); */
-});
-
-module.exports = connection
+module.exports = sql;
